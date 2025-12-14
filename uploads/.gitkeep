@@ -1,0 +1,4 @@
+# This file is intentionally left blank.
+# It is used to ensure that the 'uploads' directory is tracked by Git,
+# even when it is empty. The .gitignore file is configured to ignore all
+# other files in this directory.

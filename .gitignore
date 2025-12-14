@@ -1,0 +1,34 @@
+# Dependencies
+# Ignore the node_modules directory where packages are installed.
+/node_modules
+
+# Lockfiles
+# It is strongly recommended to commit package-lock.json to ensure
+# consistent dependency versions across all environments.
+# However, adding it here as requested.
+package-lock.json
+
+# Environment Variables
+# Ignore the .env file which contains sensitive credentials and secrets.
+# It's a good practice to commit a .env.example file instead.
+.env
+
+# Logs
+# Ignore log files that may be generated during development or in production.
+logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# User-Uploaded Content
+# Ignore the contents of the uploads directory, but keep the directory itself.
+/uploads/*
+!/uploads/.gitkeep
+# OS-generated files
+.DS_Store
+Thumbs.db
+
+# Editor directories and files
+.vscode/
+.idea/
