@@ -1,5 +1,5 @@
-const nodemailer = require("nodemailer");
-const dotenv = require("dotenv");
+import nodemailer from 'nodemailer';
+import dotenv from 'dotenv';
 
 dotenv.config();
 
@@ -7,18 +7,21 @@ dotenv.config();
 // I'm using Gmail as an example. For production, consider a transactional email service
 // like SendGrid, Mailgun, or AWS SES.
 const transporter = nodemailer.createTransport({
-  service: "gmail",
+  service: 'gmail',
   auth: {
     user: process.env.EMAIL_USER, // Your email address from .env
     pass: process.env.EMAIL_PASS, // Your email password or app-specific password from .env
   },
 });
 
-const sendPasswordResetEmail = async (to, otp) => {
+export const sendPasswordResetEmail = async (
+  to: string,
+  otp: string | number,
+): Promise<void> => {
   const mailOptions = {
     from: `"Your App" <${process.env.EMAIL_USER}>`,
     to,
-    subject: "Your Password Reset OTP",
+    subject: 'Your Password Reset OTP',
     html: `
       <p>You requested a password reset.</p>
       <p>Your One-Time Password (OTP) is: <strong>${otp}</strong></p>
@@ -29,11 +32,14 @@ const sendPasswordResetEmail = async (to, otp) => {
   await transporter.sendMail(mailOptions);
 };
 
-const sendVerificationEmail = async (to, otp) => {
+export const sendVerificationEmail = async (
+  to: string,
+  otp: string | number,
+): Promise<string | number> => {
   const mailOptions = {
     from: `"Your App" <${process.env.EMAIL_USER}>`,
     to,
-    subject: "Verify Your Email Address for YourApp",
+    subject: 'Verify Your Email Address for YourApp',
     html: `
       <p>Welcome to YourApp! Please use the following One-Time Password (OTP) to verify your email address.</p>
       <p>Your OTP is: <strong>${otp}</strong></p>
@@ -44,5 +50,3 @@ const sendVerificationEmail = async (to, otp) => {
   await transporter.sendMail(mailOptions);
   return otp;
 };
-
-module.exports = { sendPasswordResetEmail, sendVerificationEmail };

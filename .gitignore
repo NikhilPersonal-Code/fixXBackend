@@ -11,7 +11,7 @@ package-lock.json
 # Environment Variables
 # Ignore the .env file which contains sensitive credentials and secrets.
 # It's a good practice to commit a .env.example file instead.
-.env
+/.env
 
 # Logs
 # Ignore log files that may be generated during development or in production.
@@ -23,8 +23,8 @@ yarn-error.log*
 
 # User-Uploaded Content
 # Ignore the contents of the uploads directory, but keep the directory itself.
-/uploads/*
-!/uploads/.gitkeep
+/public/uploads/*
+!/public/uploads/.gitkeep
 # OS-generated files
 .DS_Store
 Thumbs.db

@@ -1,10 +1,11 @@
-const multer = require("multer");
-const path = require("path");
+import multer from 'multer';
+import path from 'path';
+import { Request } from 'express';
 
 // Set up storage for uploaded files
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, "uploads/");
+    cb(null, 'public/uploads/');
   },
   filename: (req, file, cb) => {
     // Create a unique filename
@@ -15,13 +16,17 @@ const storage = multer.diskStorage({
 // Create the multer instance
 const upload = multer({
   storage: storage,
-  fileFilter: (req, file, cb) => {
+  fileFilter: (
+    req: Request,
+    file: Express.Multer.File,
+    cb: multer.FileFilterCallback,
+  ) => {
     // Accept images only
-    if (!file.mimetype.startsWith("image/")) {
-      return cb(new Error("Only image files are allowed!"), false);
+    if (!file.mimetype.startsWith('image/')) {
+      return cb(new Error('Only image files are allowed!'));
     }
     cb(null, true);
   },
 });
 
-module.exports = upload;
+export default upload;
