@@ -2,10 +2,10 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import 'dotenv/config';
-import testRoutes from './routes/testRoutes';
-import authRoutes from './routes/authRoutes';
-import userRoutes from './routes/userRoutes';
-import { testConnection } from './utils/db';
+import testRoutes from '@routes/testRoutes';
+import authRoutes from '@routes/authRoutes';
+import userRoutes from '@routes/userRoutes';
+import { testConnection } from '@utils/db';
 
 const app: Application = express();
 

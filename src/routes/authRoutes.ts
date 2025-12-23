@@ -9,8 +9,7 @@ import {
   sendEmailRegistrationOtp,
   resetPassword,
   deleteAccount,
-} from '../controllers/authController';
-import authMiddleware from '../middleware/auth';
+} from '@controllers/authController';
 
 const router = express.Router();
 

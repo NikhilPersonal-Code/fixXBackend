@@ -1,12 +1,12 @@
 import { Request, Response } from 'express';
-import db from '../config/db';
-import { users, otps } from '../db/schema';
+import db from '@config/db';
+import { users, otps } from '@db/schema';
 import { eq, or, and, gt } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
-import { downloadImage } from '../utils/imageDownloader';
-import { sendPasswordResetEmail, sendVerificationEmail } from '../utils/mailer';
+import { downloadImage } from '@utils/imageDownloader';
+import { sendPasswordResetEmail, sendVerificationEmail } from '@utils/mailer';
 import { promises as fs } from 'fs';
 import path from 'path';
 

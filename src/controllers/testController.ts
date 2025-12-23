@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import db from '../config/db';
+import db from '@config/db';
 import { sql } from 'drizzle-orm';
 
 export const getUsers = async (req: Request, res: Response) => {

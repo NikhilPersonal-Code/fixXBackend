@@ -1,6 +1,6 @@
 import express from 'express';
-import { updateProfile } from '../controllers/userController';
-import upload from '../middleware/upload';
+import { updateProfile } from '@controllers/userController';
+import upload from '@middleware/upload';
 
 const router = express.Router();
 

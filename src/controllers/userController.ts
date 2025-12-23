@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import db from '../config/db';
-import { users } from '../db/schema';
+import db from '@config/db';
+import { users } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import path from 'path';

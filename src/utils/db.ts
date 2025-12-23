@@ -1,4 +1,4 @@
-import db from '../config/db';
+import db from '@config/db';
 import { sql } from 'drizzle-orm';
 
 export const testConnection = async () => {
