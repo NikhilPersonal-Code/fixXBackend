@@ -20,6 +20,6 @@
       "@constants/*": ["./src/constants/*"]
     }
   },
-  "include": ["src/**/*"],
+  "include": ["src/**/*", "personal/new-files-can-be-added/spatialController.ts"],
   "exclude": ["node_modules"]
 }
