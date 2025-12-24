@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
-import db from '@config/db';
-import { users, otps } from '@db/schema';
+import db from '@config/dbConfig';
+import { users, otps } from '@db/tables';
 import { eq, or, and, gt } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
@@ -48,8 +48,8 @@ export const googleLogin = async (req: Request, res: Response) => {
           name,
           email,
           username,
-          password_hash: hashed,
-          profile_url: localProfileUrl,
+          passwordHash: hashed,
+          profileUrl: localProfileUrl,
           isActive: 1,
         })
         .returning({ insertId: users.id });
@@ -65,21 +65,21 @@ export const googleLogin = async (req: Request, res: Response) => {
       userId = existingUser.id;
       await db.update(users).set({ isActive: 1 }).where(eq(users.id, userId));
 
-      // If the user's profile_url is still a google url, download it and update it.
+      // If the user's profileUrl is still a google url, download it and update it.
       if (
-        existingUser.profile_url &&
-        existingUser.profile_url.startsWith('http')
+        existingUser.profileUrl &&
+        existingUser.profileUrl.startsWith('http')
       ) {
-        const localProfileUrl = await downloadImage(existingUser.profile_url);
+        const localProfileUrl = await downloadImage(existingUser.profileUrl);
         await db
           .update(users)
-          .set({ profile_url: localProfileUrl })
+          .set({ profileUrl: localProfileUrl })
           .where(eq(users.id, userId));
-      } else if (!existingUser.profile_url && picture) {
+      } else if (!existingUser.profileUrl && picture) {
         const localProfileUrl = await downloadImage(picture);
         await db
           .update(users)
-          .set({ profile_url: localProfileUrl })
+          .set({ profileUrl: localProfileUrl })
           .where(eq(users.id, userId));
       }
       tokenData = {
@@ -92,14 +92,14 @@ export const googleLogin = async (req: Request, res: Response) => {
 
     const userWithImage = await db.query.users.findFirst({
       where: eq(users.id, userId),
-      columns: { profile_url: true },
+      columns: { profileUrl: true },
     });
 
     // 4. Generate JWT
     const token = jwt.sign({ userId }, process.env.JWT_SECRET as string, {
       expiresIn: '1d',
     });
-    const userData = { ...tokenData, picture: userWithImage?.profile_url };
+    const userData = { ...tokenData, picture: userWithImage?.profileUrl };
     return res.json({
       token,
       userData,
@@ -177,11 +177,9 @@ export const registerUser = async (req: Request, res: Response) => {
         const hashed = await bcrypt.hash(password, 10);
 
         await tx.insert(users).values({
-          username,
-          password_hash: hashed,
+          passwordHash: hashed,
           name,
           email,
-          isActive: 0,
         });
 
         await tx.delete(otps).where(eq(otps.email, email));
@@ -213,7 +211,7 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(401).json({ message: 'User not found' });
   }
 
-  const valid = await bcrypt.compare(password, user.password_hash as string);
+  const valid = await bcrypt.compare(password, user.passwordHash as string);
   if (!valid) {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
@@ -225,7 +223,7 @@ export const loginUser = async (req: Request, res: Response) => {
     name: user.name,
     email: user.email,
     username: user.username,
-    picture: user.profile_url,
+    picture: user.profileUrl,
   };
   const token = jwt.sign(
     {
@@ -260,7 +258,7 @@ export const sendForgotPasswordOtp = async (req: Request, res: Response) => {
     // Store the OTP and its expiration in the database
     await db
       .update(users)
-      .set({ reset_token: otp, reset_token_expires: otpExpires })
+      .set({ resetToken: otp, resetTokenExpires: otpExpires })
       .where(eq(users.email, email));
 
     // Send the email
@@ -284,8 +282,8 @@ export const verifyForgotPasswordOtp = async (req: Request, res: Response) => {
     const user = await db.query.users.findFirst({
       where: and(
         eq(users.email, email),
-        eq(users.reset_token, otp),
-        gt(users.reset_token_expires, new Date()),
+        eq(users.resetToken, otp),
+        gt(users.resetTokenExpires, new Date()),
       ),
     });
     if (!user) {
@@ -306,8 +304,8 @@ export const resetPassword = async (req: Request, res: Response) => {
     const user = await db.query.users.findFirst({
       where: and(
         eq(users.email, email),
-        eq(users.reset_token, otp),
-        gt(users.reset_token_expires, new Date()),
+        eq(users.resetToken, otp),
+        gt(users.resetTokenExpires, new Date()),
       ),
     });
 
@@ -322,9 +320,9 @@ export const resetPassword = async (req: Request, res: Response) => {
     await db
       .update(users)
       .set({
-        password_hash: hashed,
-        reset_token: null,
-        reset_token_expires: null,
+        passwordHash: hashed,
+        resetToken: null,
+        resetTokenExpires: null,
       })
       .where(eq(users.email, email));
 
@@ -347,21 +345,21 @@ export const logoutUser = async (req: Request, res: Response) => {
 
 export const deleteAccount = async (req: Request, res: Response) => {
   const { userId } = req.params;
-  const id = parseInt(userId);
+  const id = userId;
 
   try {
     return await db.transaction(async (tx) => {
       // Get user's profile URL before deleting the user record
       const user = await tx.query.users.findFirst({
         where: eq(users.id, id),
-        columns: { profile_url: true },
+        columns: { profileUrl: true },
       });
 
       if (!user) {
         return res.status(404).json({ message: 'User not found.' });
       }
 
-      const profileUrl = user.profile_url;
+      const profileUrl = user.profileUrl;
 
       // 4. Delete the user from the users table.
       await tx.delete(users).where(eq(users.id, id));

@@ -1,13 +1,12 @@
 import { Request, Response } from 'express';
-import db from '@config/db';
-import { users } from '@db/schema';
+import db from '@config/dbConfig';
+import { users } from '@db/tables';
 import { eq } from 'drizzle-orm';
 import { promises as fs } from 'fs';
 import path from 'path';
 
 export const updateProfile = async (req: Request, res: Response) => {
   const { userId } = req.params;
-  const id = parseInt(userId);
 
   if (!req.file) {
     return res.status(400).json({ message: 'No profile image file uploaded.' });
@@ -19,21 +18,21 @@ export const updateProfile = async (req: Request, res: Response) => {
   let oldProfileUrl: string | null = null;
 
   try {
-    // 1. Fetch the user's current profile_url before updating
+    // 1. Fetch the user's current profileUrl before updating
     const user = await db.query.users.findFirst({
-      where: eq(users.id, id),
-      columns: { profile_url: true },
+      where: eq(users.id, userId),
+      columns: { profileUrl: true },
     });
 
     if (user) {
-      oldProfileUrl = user.profile_url;
+      oldProfileUrl = user.profileUrl;
     }
 
-    // 2. Update the user's profile_url in the database with the new image
+    // 2. Update the user's profileUrl in the database with the new image
     await db
       .update(users)
-      .set({ profile_url: newProfileUrl })
-      .where(eq(users.id, id));
+      .set({ profileUrl: newProfileUrl })
+      .where(eq(users.id, userId));
 
     // 3. If an old local profile image exists, delete it from the server
     if (oldProfileUrl && oldProfileUrl.startsWith('/uploads/')) {
