@@ -9,7 +9,12 @@ export const createTask = async (req: Request, res: Response) => {
     const userId = (req as any).user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ status: 'error', message: 'Unauthorized - No user ID in token' });
+      return res
+        .status(401)
+        .json({
+          status: 'error',
+          message: 'Unauthorized - No user ID in token',
+        });
     }
 
     const {

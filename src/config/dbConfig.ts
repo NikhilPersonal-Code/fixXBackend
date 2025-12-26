@@ -6,6 +6,17 @@ import * as schema from '@db/tables';
 
 const pool = new Pool(dbConfig);
 
+// Handle pool errors
+pool.on('error', (err) => {
+  console.error('Unexpected error on idle client', err);
+  // Don't crash the server, just log the error
+});
+
+// Optional: Log when a client is acquired/released
+pool.on('connect', () => {
+  console.log('Database client connected');
+});
+
 const db = drizzle(pool, { schema });
 
 export default db;
