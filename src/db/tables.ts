@@ -1,4 +1,3 @@
-import 'tsconfig-paths/register';
 import {
   pgTable,
   uuid,
@@ -11,7 +10,6 @@ import {
   index,
   varchar,
   check,
-  geometry,
 } from 'drizzle-orm/pg-core';
 import { sql } from 'drizzle-orm';
 import {
@@ -90,11 +88,11 @@ export const fixxerProfiles = pgTable(
     // .default('0')
     // .notNull(),
     isAvailable: boolean('is_available').default(true).notNull(),
-    locationPreferences: geometry('location_preferences', {
-      type: 'point',
-      mode: 'xy',
-      srid: 4326,
-    }),
+    // Location stored as { x: longitude, y: latitude }
+    locationPreferences: jsonb('location_preferences').$type<{
+      x: number;
+      y: number;
+    } | null>(),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -133,11 +131,10 @@ export const tasks = pgTable(
     }),
     taskTitle: varchar('task_title', { length: 200 }).notNull(),
     taskDescription: text('task_description').notNull(),
-    taskLocation: geometry('task_location', {
-      type: 'point',
-      mode: 'xy',
-      srid: 4326,
-    }).notNull(),
+    // Location stored as { x: longitude, y: latitude }
+    taskLocation: jsonb('task_location')
+      .$type<{ x: number; y: number }>()
+      .notNull(),
     locationAddress: text('location_address'),
     voiceInstructionUrl: text('voice_instruction_url'),
     mustHaveItems: text('must_have_items'),
@@ -161,7 +158,7 @@ export const tasks = pgTable(
     index('tasks_assigned_fixxer_id_idx').on(table.assignedFixxerId),
     index('tasks_status_idx').on(table.status),
     index('tasks_created_at_idx').on(table.createdAt),
-    index('tasks_location_idx').using('gist', table.taskLocation),
+    index('tasks_location_idx').using('gin', table.taskLocation),
     check('budget_check', sql`budget > 0`),
     check('task_title_length_check', sql`char_length(task_title) > 10`),
     check(

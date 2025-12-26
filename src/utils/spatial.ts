@@ -1,70 +1,95 @@
+/**
+ * Spatial utilities for location-based queries WITHOUT PostGIS dependency
+ * Uses pure PostgreSQL with JSONB and Haversine formula for distance calculations
+ */
+
 import { sql, SQL, AnyColumn } from 'drizzle-orm';
 
 /**
- * Interface for geographic coordinates
+ * Interface for geographic coordinates stored in JSONB
  */
 export interface GeoPoint {
-  x: number; // longitude
-  y: number; // latitude
+  x: number; // longitude (-180 to 180)
+  y: number; // latitude (-90 to 90)
 }
 
 /**
- * Create a PostGIS point from coordinates
- * @param longitude - Longitude value (-180 to 180)
- * @param latitude - Latitude value (-90 to 90)
- * @returns SQL fragment for ST_SetSRID(ST_MakePoint(...), 4326)
+ * Earth's radius in meters (used for Haversine formula)
  */
-export const makePoint = (longitude: number, latitude: number) => {
-  return sql`ST_SetSRID(ST_MakePoint(${longitude}, ${latitude}), 4326)`;
-};
+const EARTH_RADIUS_METERS = 6371000;
 
 /**
- * Calculate distance between two points in meters
- * Uses geography cast for accurate spherical distance
- * @param point1 - First geometry point column or SQL expression
- * @param point2 - Second geometry point column or SQL expression
- * @returns SQL fragment for ST_Distance with geography cast
+ * Calculate distance between a JSONB point column and reference coordinates using Haversine formula
+ * Returns distance in METERS
+ *
+ * @param pointColumn - JSONB column containing {x: longitude, y: latitude}
+ * @param longitude - Reference longitude
+ * @param latitude - Reference latitude
+ * @returns SQL fragment that calculates distance in meters
  */
 export const distanceInMeters = (
-  point1: SQL | AnyColumn,
-  point2: SQL | AnyColumn,
+  pointColumn: SQL | AnyColumn,
+  longitude: number,
+  latitude: number,
 ) => {
-  return sql`ST_Distance(${point1}::geography, ${point2}::geography)`;
+  // Haversine formula in pure SQL
+  // Distance = 2 * R * asin(sqrt(sin²((lat2-lat1)/2) + cos(lat1) * cos(lat2) * sin²((lng2-lng1)/2)))
+  return sql`(
+    2 * ${EARTH_RADIUS_METERS} * asin(sqrt(
+      power(sin(radians((${pointColumn}->>'y')::float - ${latitude}) / 2), 2) +
+      cos(radians(${latitude})) *
+      cos(radians((${pointColumn}->>'y')::float)) *
+      power(sin(radians((${pointColumn}->>'x')::float - ${longitude}) / 2), 2)
+    ))
+  )`;
 };
 
 /**
- * Find points within a radius (in meters)
- * Uses ST_DWithin with geography cast for accurate spherical calculations
- * @param point1 - Geometry point column
- * @param point2 - Reference point (SQL expression)
+ * Find points within a radius (in meters) using Haversine formula
+ *
+ * @param pointColumn - JSONB column containing {x: longitude, y: latitude}
+ * @param longitude - Reference longitude
+ * @param latitude - Reference latitude
  * @param radiusMeters - Radius in meters
  * @returns SQL fragment for WHERE clause
  */
 export const withinRadius = (
-  point1: SQL | AnyColumn,
-  point2: SQL | AnyColumn,
+  pointColumn: SQL | AnyColumn,
+  longitude: number,
+  latitude: number,
   radiusMeters: number,
 ) => {
-  return sql`ST_DWithin(${point1}::geography, ${point2}::geography, ${radiusMeters})`;
+  return sql`(
+    2 * ${EARTH_RADIUS_METERS} * asin(sqrt(
+      power(sin(radians((${pointColumn}->>'y')::float - ${latitude}) / 2), 2) +
+      cos(radians(${latitude})) *
+      cos(radians((${pointColumn}->>'y')::float)) *
+      power(sin(radians((${pointColumn}->>'x')::float - ${longitude}) / 2), 2)
+    ))
+  ) <= ${radiusMeters}`;
 };
 
 /**
- * Order by distance (nearest first)
- * Uses <-> operator for efficient KNN search
- * @param point1 - Geometry point column
- * @param point2 - Reference point (SQL expression)
+ * Order by distance (nearest first) using Haversine formula
+ *
+ * @param pointColumn - JSONB column containing {x: longitude, y: latitude}
+ * @param longitude - Reference longitude
+ * @param latitude - Reference latitude
  * @returns SQL fragment for ORDER BY clause
  */
 export const orderByDistance = (
-  point1: SQL | AnyColumn,
-  point2: SQL | AnyColumn,
+  pointColumn: SQL | AnyColumn,
+  longitude: number,
+  latitude: number,
 ) => {
-  return sql`${point1} <-> ${point2}`;
+  return distanceInMeters(pointColumn, longitude, latitude);
 };
 
 /**
- * Find points within a bounding box
- * @param pointColumn - Geometry point column
+ * Find points within a bounding box (fast pre-filter before Haversine)
+ * Use this for efficient queries before applying exact radius filter
+ *
+ * @param pointColumn - JSONB column containing {x: longitude, y: latitude}
  * @param minLng - Minimum longitude (west)
  * @param minLat - Minimum latitude (south)
  * @param maxLng - Maximum longitude (east)
@@ -78,8 +103,57 @@ export const withinBoundingBox = (
   maxLng: number,
   maxLat: number,
 ) => {
-  return sql`ST_Within(${pointColumn}, ST_MakeEnvelope(${minLng}, ${minLat}, ${maxLng}, ${maxLat}, 4326))`;
+  return sql`(
+    (${pointColumn}->>'x')::float >= ${minLng} AND
+    (${pointColumn}->>'x')::float <= ${maxLng} AND
+    (${pointColumn}->>'y')::float >= ${minLat} AND
+    (${pointColumn}->>'y')::float <= ${maxLat}
+  )`;
 };
+
+/**
+ * Calculate bounding box from center point and radius
+ * Useful for creating a fast pre-filter before exact Haversine calculation
+ *
+ * @param longitude - Center longitude
+ * @param latitude - Center latitude
+ * @param radiusMeters - Radius in meters
+ * @returns Bounding box coordinates
+ */
+export const getBoundingBox = (
+  longitude: number,
+  latitude: number,
+  radiusMeters: number,
+): { minLng: number; minLat: number; maxLng: number; maxLat: number } => {
+  // Approximate degrees per meter at given latitude
+  const latDelta = radiusMeters / 111320; // ~111.32 km per degree latitude
+  const lngDelta =
+    radiusMeters / (111320 * Math.cos((latitude * Math.PI) / 180));
+
+  return {
+    minLng: longitude - lngDelta,
+    maxLng: longitude + lngDelta,
+    minLat: latitude - latDelta,
+    maxLat: latitude + latDelta,
+  };
+};
+
+/**
+ * Create a GeoPoint object
+ *
+ * @param longitude - Longitude value (-180 to 180)
+ * @param latitude - Latitude value (-90 to 90)
+ * @returns GeoPoint object for storing in JSONB column
+ */
+export const createGeoPoint = (
+  longitude: number,
+  latitude: number,
+): GeoPoint => ({
+  x: longitude,
+  y: latitude,
+});
+
+// ==================== UNIT CONVERTERS ====================
 
 /**
  * Convert distance from kilometers to meters
