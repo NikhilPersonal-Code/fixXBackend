@@ -6,10 +6,10 @@ import { eq, desc, and, sql } from 'drizzle-orm';
 // Create a new task
 export const createTask = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
-      return res.status(401).json({ status: 'error', message: 'Unauthorized' });
+      return res.status(401).json({ status: 'error', message: 'Unauthorized - No user ID in token' });
     }
 
     const {
@@ -280,7 +280,7 @@ export const getTaskById = async (req: Request, res: Response) => {
 // Get user's own tasks
 export const getMyTasks = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
 
     if (!userId) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
@@ -328,7 +328,7 @@ export const getMyTasks = async (req: Request, res: Response) => {
 // Update task
 export const updateTask = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
     const { id } = req.params;
 
     if (!userId) {
@@ -383,7 +383,7 @@ export const updateTask = async (req: Request, res: Response) => {
 // Cancel task
 export const cancelTask = async (req: Request, res: Response) => {
   try {
-    const userId = (req as any).user?.id;
+    const userId = (req as any).user?.userId;
     const { id } = req.params;
     const { reason } = req.body;
 
