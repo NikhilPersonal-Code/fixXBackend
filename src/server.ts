@@ -5,6 +5,7 @@ import 'dotenv/config';
 import testRoutes from '@routes/testRoutes';
 import authRoutes from '@routes/authRoutes';
 import userRoutes from '@routes/userRoutes';
+import taskRoutes from '@routes/taskRoutes';
 import { testConnection } from '@utils/db';
 
 const app: Application = express();
@@ -20,6 +21,7 @@ app.use('/api', express.static('public')); // serve static files from public fol
 app.use('/api/test', testRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/user', userRoutes);
+app.use('/api/tasks', taskRoutes);
 
 // Add more route imports as needed
 
