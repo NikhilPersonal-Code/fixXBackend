@@ -45,12 +45,12 @@ export const googleLogin = async (req: Request, res: Response) => {
       const [result] = await db
         .insert(users)
         .values({
-          name,
-          email,
-          username,
+          username: username!,
+          name: name!,
+          email: email!,
           passwordHash: hashed,
           profileUrl: localProfileUrl,
-          isActive: 1,
+          isActive: true,
         })
         .returning({ insertId: users.id });
 
@@ -63,7 +63,10 @@ export const googleLogin = async (req: Request, res: Response) => {
       };
     } else {
       userId = existingUser.id;
-      await db.update(users).set({ isActive: 1 }).where(eq(users.id, userId));
+      await db
+        .update(users)
+        .set({ isActive: true })
+        .where(eq(users.id, userId));
 
       // If the user's profileUrl is still a google url, download it and update it.
       if (
@@ -113,6 +116,8 @@ export const googleLogin = async (req: Request, res: Response) => {
 
 export const sendEmailRegistrationOtp = async (req: Request, res: Response) => {
   const { email } = req.body;
+  console.log("email : "+email);
+  
 
   try {
     const existingUser = await db.query.users.findFirst({
@@ -128,7 +133,11 @@ export const sendEmailRegistrationOtp = async (req: Request, res: Response) => {
 
       if (!existingOtp) {
         await sendVerificationEmail(email, sentOtp);
-        await db.insert(otps).values({ email, otp: sentOtp });
+        await db.insert(otps).values({
+          email,
+          otp: sentOtp,
+          expiresAt: new Date(Date.now() + 10 * 60 * 1000),
+        }); // OTP expires in 10 minutes
       } else {
         await sendVerificationEmail(email, sentOtp);
         await db
@@ -180,6 +189,7 @@ export const registerUser = async (req: Request, res: Response) => {
           passwordHash: hashed,
           name,
           email,
+          username,
         });
 
         await tx.delete(otps).where(eq(otps.email, email));
@@ -216,7 +226,7 @@ export const loginUser = async (req: Request, res: Response) => {
     return res.status(401).json({ message: 'Invalid credentials' });
   }
 
-  await db.update(users).set({ isActive: 1 }).where(eq(users.id, user.id));
+  await db.update(users).set({ isActive: true }).where(eq(users.id, user.id));
 
   const userData = {
     id: user.id,
@@ -339,7 +349,7 @@ export const resetPassword = async (req: Request, res: Response) => {
 export const logoutUser = async (req: Request, res: Response) => {
   const { id } = req.body;
 
-  await db.update(users).set({ isActive: 0 }).where(eq(users.id, id));
+  await db.update(users).set({ isActive: true }).where(eq(users.id, id));
   res.json({ message: 'User logged out successfully' });
 };
 

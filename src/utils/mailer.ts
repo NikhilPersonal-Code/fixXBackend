@@ -7,11 +7,11 @@ dotenv.config();
 // I'm using Gmail as an example. For production, consider a transactional email service
 // like SendGrid, Mailgun, or AWS SES.
 const transporter = nodemailer.createTransport({
-  service: 'gmail',
   auth: {
-    user: process.env.EMAIL_USER, // Your email address from .env
-    pass: process.env.EMAIL_PASS, // Your email password or app-specific password from .env
+    user: process.env.USER_EMAIL, // Your email address from .env
+    pass: process.env.USER_EMAIL_APP_PASSWORD, // Your email password or app-specific password from .env
   },
+  service: 'gmail',
 });
 
 export const sendPasswordResetEmail = async (
