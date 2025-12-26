@@ -12,6 +12,8 @@ import verifyToken from '@middleware/auth';
 
 const router = Router();
 
+
+
 // Public routes
 router.get('/', getTasks); // Get all posted tasks (for feed)
 router.get('/latest', getLatestTasks); // Get latest tasks (for notifications)
