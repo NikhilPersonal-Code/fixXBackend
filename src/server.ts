@@ -2,6 +2,7 @@ import express, { Application } from 'express';
 import cors from 'cors';
 import morgan from 'morgan';
 import 'dotenv/config';
+import 'tsconfig-paths/register';
 import testRoutes from '@routes/testRoutes';
 import authRoutes from '@routes/authRoutes';
 import userRoutes from '@routes/userRoutes';
