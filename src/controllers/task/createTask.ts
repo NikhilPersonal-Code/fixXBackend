@@ -3,11 +3,12 @@ import db from '@config/dbConfig';
 import { tasks, categories } from '@db/tables';
 import { eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/common';
+import { sendPushToAllExcept } from '@utils/pushNotification';
 
 // Create a new task
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
-    const userId = req.user?.userId;
+    const userId = req.user?.userId || req.body.userId;
 
     if (!userId) {
       return res.status(401).json({
@@ -114,6 +115,11 @@ export const createTask = async (req: AuthRequest, res: Response) => {
         status: 'posted',
       })
       .returning();
+
+    // Send push notification to all users except task owner
+    await sendPushToAllExcept(userId, 'New Task Available!', taskTitle, {
+      taskId: newTask.id,
+    });
 
     return res.status(201).json({
       status: 'ok',

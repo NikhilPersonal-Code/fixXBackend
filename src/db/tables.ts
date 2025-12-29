@@ -38,6 +38,7 @@ export const users = pgTable(
     passwordHash: text('password_hash'),
     // phoneNumber: varchar('phone_number', { length: 20 }).unique(),
     profileUrl: text('profile_url'),
+    fcmToken: text('fcm_token'),
     userRole: userRoleEnum('user_role').default('both').notNull(),
     isActive: boolean('is_active').default(false).notNull(),
     isEmailVerified: boolean('is_email_verified').default(false).notNull(),

@@ -20,8 +20,12 @@ export const getLatestTasks = async (req: Request, res: Response) => {
         createdAt: tasks.createdAt,
         categoryName: categories.categoryName,
         categoryIcon: categories.iconUrl,
+        mustHaveItems: tasks.mustHaveItems || null,
+        clientId: users.id,
         clientName: users.name,
         clientProfileUrl: users.profileUrl,
+        openToOffer: tasks.openToOffer || false,
+        priceType: tasks.priceType || null,
       })
       .from(tasks)
       .leftJoin(categories, eq(tasks.categoryId, categories.id))

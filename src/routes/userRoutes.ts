@@ -1,6 +1,7 @@
 import express from 'express';
-import { updateProfile } from '@controllers/user';
+import { updateProfile, updateFcmToken } from '@controllers/user';
 import upload from '@middleware/upload';
+import authMiddleware from '@middleware/auth';
 
 const router = express.Router();
 
@@ -12,5 +13,7 @@ router.patch(
   ...upload.single('profileImage'),
   updateProfile,
 );
+
+router.post('/fcm-token', authMiddleware, updateFcmToken);
 
 export default router;
