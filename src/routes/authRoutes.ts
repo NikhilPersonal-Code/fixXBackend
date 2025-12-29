@@ -9,7 +9,7 @@ import {
   sendEmailRegistrationOtp,
   resetPassword,
   deleteAccount,
-} from '@controllers/authController';
+} from '@controllers/auth';
 
 const router = express.Router();
 

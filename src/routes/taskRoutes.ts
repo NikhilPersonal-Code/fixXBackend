@@ -7,12 +7,10 @@ import {
   getMyTasks,
   updateTask,
   cancelTask,
-} from '@controllers/taskController';
+} from '@controllers/task';
 import verifyToken from '@middleware/auth';
 
 const router = Router();
-
-
 
 // Public routes
 router.get('/', getTasks); // Get all posted tasks (for feed)

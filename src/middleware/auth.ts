@@ -1,10 +1,6 @@
+import { AuthRequest } from '@/types/common';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
-
-export interface AuthRequest extends Request {
-  // TODO: Define a proper user type based on your application's user model :NikhilRW
-  user?: any;
-}
 
 const authMiddleware = (
   req: AuthRequest,
@@ -16,7 +12,7 @@ const authMiddleware = (
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET as string);
-    req.user = decoded;
+    req.user = decoded as { userId: string };
     next();
   } catch (err) {
     res.status(401).json({ message: 'Invalid token' });

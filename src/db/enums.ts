@@ -11,6 +11,7 @@ export const taskStatusEnum = pgEnum('task_status', [
   'completed',
   'cancelled',
 ]);
+export type TaskStatus = (typeof taskStatusEnum.enumValues)[number];
 
 export const priceTypeEnum = pgEnum('price_type', ['per_hour', 'total']);
 

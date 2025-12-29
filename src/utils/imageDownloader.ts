@@ -1,36 +1,38 @@
-import fs from 'fs';
-import path from 'path';
 import axios from 'axios';
-import { v4 as uuidv4 } from 'uuid';
+import cloudinary from '@config/cloudinaryConfig';
 
 /**
- * Downloads an image from a URL and saves it to a local directory.
+ * Downloads an image from a URL and uploads it to Cloudinary.
  * @param {string} url The URL of the image to download.
- * @param {string} destinationFolder The folder to save the image in (e.g., 'uploads/').
- * @returns {Promise<string>} The local path to the saved image (e.g., '/uploads/filename.jpg').
+ * @param {string} folder The Cloudinary folder to save the image in (e.g., 'fixx/profiles').
+ * @returns {Promise<string>} The Cloudinary URL of the uploaded image.
  */
-export const downloadImage = async (
+export const uploadImageToCloudinary = async (
   url: string,
-  destinationFolder: string = 'public/uploads/',
+  folder: string = 'fixx/profiles',
 ): Promise<string> => {
   try {
-    const response = await axios({
-      url,
-      method: 'GET',
-      responseType: 'stream',
-    });
-
-    const contentType = response.headers['content-type'] as string;
-    const extension = contentType ? contentType.split('/')[1] : 'jpg';
-    const filename = `${uuidv4()}.${extension}`;
-    const localPath = path.join(destinationFolder, filename);
-
-    const writer = fs.createWriteStream(localPath);
-    response.data.pipe(writer);
-
-    return new Promise((resolve, reject) => {
-      writer.on('finish', () => resolve(`/uploads/${filename}`));
-      writer.on('error', reject);
+    // Upload to Cloudinary
+    return new Promise((resolve, _) => {
+      cloudinary.uploader.upload(
+        url,
+        {
+          folder: folder,
+          unique_filename: true,
+          resource_type: 'image',
+        },
+        (error, result) => {
+          if (error) {
+            console.error('Failed to upload image to Cloudinary:', error);
+            // Return the original URL as a fallback
+            resolve(url);
+          } else if (result) {
+            resolve(result.secure_url);
+          } else {
+            resolve(url);
+          }
+        },
+      );
     });
   } catch (error) {
     console.error('Failed to download image:', error);
