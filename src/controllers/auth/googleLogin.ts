@@ -7,7 +7,10 @@ import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
 import { uploadImageToCloudinary } from '@utils/imageDownloader';
 
-const client = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
+
+const client = new OAuth2Client({
+  client_id: process.env.GOOGLE_CLIENT_ID,
+});
 
 export const googleLogin = async (req: Request, res: Response) => {
   const { idToken } = req.body;
@@ -17,7 +20,6 @@ export const googleLogin = async (req: Request, res: Response) => {
 
     const ticket = await client.verifyIdToken({
       idToken,
-      audience: process.env.GOOGLE_CLIENT_ID,
     });
 
     const payload = ticket.getPayload();
