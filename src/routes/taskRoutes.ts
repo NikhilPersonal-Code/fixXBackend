@@ -7,6 +7,11 @@ import {
   getMyTasks,
   updateTask,
   cancelTask,
+  getTaskOffers,
+  completeTask,
+  cancelOngoingTask,
+  getTaskStatus,
+  deleteTask,
 } from '@controllers/task';
 import verifyToken from '@middleware/auth';
 
@@ -20,7 +25,12 @@ router.get('/:id', getTaskById); // Get single task details
 // Protected routes (require authentication)
 router.post('/', verifyToken, createTask); // Create a new task
 router.get('/my/tasks', verifyToken, getMyTasks); // Get user's own tasks
+router.get('/:id/offers', verifyToken, getTaskOffers); // Get offers for a task (client view)
+router.get('/:id/status', verifyToken, getTaskStatus); // Get task status with timeline
 router.put('/:id', verifyToken, updateTask); // Update a task
-router.post('/:id/cancel', verifyToken, cancelTask); // Cancel a task
+router.delete('/:id', verifyToken, deleteTask); // Delete a task (posted tasks only)
+router.post('/:id/cancel', verifyToken, cancelTask); // Cancel a posted task (before assignment)
+router.post('/:id/cancel-ongoing', verifyToken, cancelOngoingTask); // Cancel an ongoing task
+router.post('/:id/complete', verifyToken, completeTask); // Mark task as completed
 
 export default router;

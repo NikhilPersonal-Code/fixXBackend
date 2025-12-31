@@ -1,7 +1,12 @@
 export * from './cancelTask';
+export * from './cancelOngoingTask';
+export * from './completeTask';
 export * from './createTask';
 export * from './getLatestTasks';
 export * from './getMyTasks';
 export * from './getTaskById';
+export * from './getTaskStatus';
 export * from './getTasks';
 export * from './updateTask';
+export { default as getTaskOffers } from './getTaskOffers';
+export { default as deleteTask } from './deleteTask';
