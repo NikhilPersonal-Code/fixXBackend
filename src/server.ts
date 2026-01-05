@@ -10,6 +10,7 @@ import userRoutes from '@routes/userRoutes';
 import taskRoutes from '@routes/taskRoutes';
 import offerRoutes from '@routes/offerRoutes';
 import messageRoutes from '@routes/messageRoutes';
+import reviewRoutes from '@routes/reviewRoutes';
 import { testConnection } from '@utils/db';
 import { initSocket } from '@utils/socket';
 
@@ -33,6 +34,7 @@ app.use('/api/user', userRoutes);
 app.use('/api/tasks', taskRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/messages', messageRoutes);
+app.use('/api/reviews', reviewRoutes);
 
 // Initialize Socket.IO
 initSocket(io);

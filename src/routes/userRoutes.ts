@@ -1,9 +1,19 @@
 import express from 'express';
-import { updateProfile, updateFcmToken } from '@controllers/user';
+import {
+  updateProfile,
+  updateFcmToken,
+  getFixxerPublicProfile,
+  getUserStats,
+} from '@controllers/user';
 import upload from '@middleware/upload';
 import authMiddleware from '@middleware/auth';
 
 const router = express.Router();
+
+// Public routes
+router.get('/fixxer/:fixxerId/profile', getFixxerPublicProfile); // Get fixxer's public profile
+
+router.get('/stats', authMiddleware, getUserStats);
 
 // Using PATCH for updating a resource is a good practice.
 // The upload.single('profileImage') middleware will handle the file upload to Cloudinary.

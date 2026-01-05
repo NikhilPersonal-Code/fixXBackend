@@ -14,6 +14,8 @@ import {
   deleteTask,
 } from '@controllers/task';
 import verifyToken from '@middleware/auth';
+import { getTaskImages } from '@/controllers/task/getTaskImages';
+import upload from '@/middleware/upload';
 
 const router = Router();
 
@@ -32,5 +34,11 @@ router.delete('/:id', verifyToken, deleteTask); // Delete a task (posted tasks o
 router.post('/:id/cancel', verifyToken, cancelTask); // Cancel a posted task (before assignment)
 router.post('/:id/cancel-ongoing', verifyToken, cancelOngoingTask); // Cancel an ongoing task
 router.post('/:id/complete', verifyToken, completeTask); // Mark task as completed
+router.get(
+  '/:id/images',
+  verifyToken,
+  // ...upload.array('images[]'),
+  getTaskImages,
+);
 
 export default router;

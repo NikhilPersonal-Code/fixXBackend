@@ -103,6 +103,32 @@ const upload = {
       },
     ];
   },
+  array: (fieldName: string) => {
+    return [
+      multerUpload.array(fieldName),
+      async (req: UpdateProfileRequest, res: Response, next: NextFunction) => {
+        if (!req.file) {
+          return next();
+        }
+
+        try {
+          const result = await uploadToCloudinary(
+            req.file.buffer,
+            'fixx/profiles',
+          );
+          // Attach Cloudinary URL and public_id to the request
+          req.cloudinaryUrl = result.secure_url;
+          req.cloudinaryPublicId = result.public_id;
+          next();
+        } catch (error) {
+          console.error('Cloudinary upload error:', error);
+          return res
+            .status(500)
+            .json({ message: 'Error uploading image to cloud storage.' });
+        }
+      },
+    ];
+  },
 };
 
 export default upload;
