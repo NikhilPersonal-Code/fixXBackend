@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import db from '@config/dbConfig';
 import { tasks, categories } from '@db/tables';
 import { and, desc, eq } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 import { TaskStatus } from '@/db/enums';
 
 // Get user's own tasks

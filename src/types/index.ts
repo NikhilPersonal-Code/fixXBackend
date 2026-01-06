@@ -1,2 +1,2 @@
 export * from './dbTables';
-export * from './common';
+export * from './request';

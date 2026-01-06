@@ -2,7 +2,7 @@ import { Response } from 'express';
 import db from '@config/dbConfig';
 import { reviews } from '@db/schema';
 import { eq } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 
 /**
  * Get all reviews for a fixxer

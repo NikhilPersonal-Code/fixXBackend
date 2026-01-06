@@ -1,12 +1,13 @@
-import { Request, Response } from 'express';
+import Express, { Request, Response } from 'express';
+import Multer, { Options } from 'multer';
 import db from '@config/dbConfig';
 import { tasks, categories, taskImages } from '@db/tables';
 import { eq } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 import { sendPushToAllExcept } from '@utils/pushNotification';
-import Formidable from 'formidable';
 import { deep, shallow } from 'q-set';
-import { uploadImageToCloudinary } from '@/utils/imageDownloader';
+import { uploadImageToCloudinaryWithUrl } from '@/utils/imageDownloader';
+import { uploadToCloudinary } from '@/middleware/upload';
 
 // Create a new task
 export const createTask = async (req: AuthRequest, res: Response) => {
@@ -19,22 +20,9 @@ export const createTask = async (req: AuthRequest, res: Response) => {
         message: 'Unauthorized - No user ID in token',
       });
     }
+    const task_data = JSON.parse(req.body.task_data);
 
-    // const formidable = Formidable({
-    //   uploadDir: './public/uploads',
-    // });
-
-    // const [fields, files] = await formidable.parse(req);
-    // const cloudinaryUrls: string[] = [];
-    // if (files && files[0]) {
-    //   for (let file of files[0]) {
-    //     cloudinaryUrls.push(
-    //       await uploadImageToCloudinary(
-    //         process.env.BACKEND_URL + '/api/' + file.newFilename,
-    //       ),
-    //     );
-    //   }
-    // }
+    
 
     let {
       categoryId,
@@ -50,38 +38,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
       openToOffer,
       typeOfTask,
       locationAddress,
-    } = req.body;
-
-    // TODO: implement a library for reading this.
-
-    // console.log(fields);
-    // console.log(files);
-
-    // categoryId = categoryId[0];
-    // taskTitle = taskTitle[0];
-    // taskLocation = {
-    //   x: fields['taskLocation[x]']![0],
-    //   y: fields['taskLocation[y]']![0],
-    // };
-    // locationAddress = locationAddress[0];
-    // budget = parseFloat(budget[0]);
-    // isAsap = isAsap[0] === 'true';
-    // taskDescription = taskDescription[0];
-    // if (scheduledAt) {
-    //   scheduledAt = scheduledAt[0] === 'undefined' ? undefined : scheduledAt[0];
-    // }
-
-    // if (openToOffer) {
-    //   openToOffer = openToOffer[0] === 'true';
-    // }
-
-    // if (typeOfTask) {
-    //   typeOfTask = typeOfTask[0];
-    // }
-
-    // if (scheduledAt) {
-    //   scheduledAt = scheduledAt[0];
-    // }
+    } = task_data;
 
     // Validate required fields
     if (
@@ -166,17 +123,28 @@ export const createTask = async (req: AuthRequest, res: Response) => {
       })
       .returning();
 
-    // if (cloudinaryUrls) {
-    //   let index = 1;
-    //   for (let url of cloudinaryUrls) {
-    //     await db.insert(taskImages).values({
-    //       imageUrl: url,
-    //       taskId: newTask.id,
-    //       displayOrder: index,
-    //     });
-    //     index += 1;
-    //   }
-    // }
+    const cloudinaryUrls: string[] = [];
+    if (req.files) {
+      for (let file of req.files as any) {
+        const response = await uploadToCloudinary(
+          file.buffer,
+          'fixx/task_images',
+        );
+        cloudinaryUrls.push(response.secure_url);
+      }
+    }
+
+    if (cloudinaryUrls) {
+      let index = 1;
+      for (let url of cloudinaryUrls) {
+        await db.insert(taskImages).values({
+          imageUrl: url,
+          taskId: newTask.id,
+          displayOrder: index,
+        });
+        index += 1;
+      }
+    }
 
     // Send push notification to all users except task owner
     await sendPushToAllExcept(userId, 'New Task Available!', taskTitle, {

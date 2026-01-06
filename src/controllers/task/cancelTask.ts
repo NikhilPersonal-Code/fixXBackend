@@ -2,7 +2,7 @@ import { Request, Response } from 'express';
 import db from '@config/dbConfig';
 import { tasks } from '@db/tables';
 import { eq, and } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 
 // Cancel task
 export const cancelTask = async (req: AuthRequest, res: Response) => {

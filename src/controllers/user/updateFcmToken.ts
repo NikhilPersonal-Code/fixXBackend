@@ -2,7 +2,7 @@ import { Response } from 'express';
 import db from '@config/dbConfig';
 import { users } from '@db/tables';
 import { eq } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 
 export const updateFcmToken = async (req: AuthRequest, res: Response) => {
   try {

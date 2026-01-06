@@ -2,7 +2,7 @@ import { Response } from 'express';
 import db from '@config/dbConfig';
 import { reviews, bookings, fixxerProfiles } from '@db/schema';
 import { eq, sql } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 
 /**
  * Create a review for a completed task

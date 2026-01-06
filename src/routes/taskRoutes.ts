@@ -15,7 +15,7 @@ import {
 } from '@controllers/task';
 import verifyToken from '@middleware/auth';
 import { getTaskImages } from '@/controllers/task/getTaskImages';
-import upload from '@/middleware/upload';
+import upload, { multerUpload } from '@/middleware/upload';
 
 const router = Router();
 
@@ -25,7 +25,7 @@ router.get('/latest', getLatestTasks); // Get latest tasks (for notifications)
 router.get('/:id', getTaskById); // Get single task details
 
 // Protected routes (require authentication)
-router.post('/', verifyToken, createTask); // Create a new task
+router.post('/', verifyToken, multerUpload.array("images"), createTask); // Create a new task
 router.get('/my/tasks', verifyToken, getMyTasks); // Get user's own tasks
 router.get('/:id/offers', verifyToken, getTaskOffers); // Get offers for a task (client view)
 router.get('/:id/status', verifyToken, getTaskStatus); // Get task status with timeline
@@ -34,11 +34,6 @@ router.delete('/:id', verifyToken, deleteTask); // Delete a task (posted tasks o
 router.post('/:id/cancel', verifyToken, cancelTask); // Cancel a posted task (before assignment)
 router.post('/:id/cancel-ongoing', verifyToken, cancelOngoingTask); // Cancel an ongoing task
 router.post('/:id/complete', verifyToken, completeTask); // Mark task as completed
-router.get(
-  '/:id/images',
-  verifyToken,
-  // ...upload.array('images[]'),
-  getTaskImages,
-);
+router.get('/:id/images', verifyToken, getTaskImages);
 
 export default router;

@@ -2,7 +2,7 @@ import { Response } from 'express';
 import db from '@config/dbConfig';
 import { offers, tasks, categories, users } from '@db/schema';
 import { eq, desc } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 
 /**
  * Get all offers made by the authenticated fixxer

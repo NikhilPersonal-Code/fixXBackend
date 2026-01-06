@@ -5,8 +5,7 @@ import { eq } from 'drizzle-orm';
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
 import { OAuth2Client } from 'google-auth-library';
-import { uploadImageToCloudinary } from '@utils/imageDownloader';
-
+import { uploadImageToCloudinaryWithUrl } from '@utils/imageDownloader';
 
 const client = new OAuth2Client({
   client_id: process.env.GOOGLE_CLIENT_ID,
@@ -37,7 +36,7 @@ export const googleLogin = async (req: Request, res: Response) => {
     if (!existingUser) {
       // Download the Google profile picture to our server
       const localProfileUrl = picture
-        ? await uploadImageToCloudinary(picture)
+        ? await uploadImageToCloudinaryWithUrl(picture)
         : null;
 
       // 3. Register new Google user
@@ -75,7 +74,7 @@ export const googleLogin = async (req: Request, res: Response) => {
         existingUser.profileUrl.startsWith('http') &&
         existingUser.profileUrl.includes('googleusercontent.com')
       ) {
-        const localProfileUrl = await uploadImageToCloudinary(
+        const localProfileUrl = await uploadImageToCloudinaryWithUrl(
           existingUser.profileUrl,
         );
         await db
@@ -83,7 +82,7 @@ export const googleLogin = async (req: Request, res: Response) => {
           .set({ profileUrl: localProfileUrl })
           .where(eq(users.id, userId));
       } else if (!existingUser.profileUrl && picture) {
-        const localProfileUrl = await uploadImageToCloudinary(picture);
+        const localProfileUrl = await uploadImageToCloudinaryWithUrl(picture);
         await db
           .update(users)
           .set({ profileUrl: localProfileUrl })

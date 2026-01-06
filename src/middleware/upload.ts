@@ -1,21 +1,26 @@
 import multer from 'multer';
 import { Request, Response, NextFunction } from 'express';
 import cloudinary from '@config/cloudinaryConfig';
-import { UpdateProfileRequest } from '@/types/common';
+import {  UpdateProfileRequest } from '@/types/request';
 
 // Use memory storage to get file buffer for Cloudinary upload
 const storage = multer.memoryStorage();
 
 // Create the multer instance
-const multerUpload = multer({
+export const multerUpload = multer({
   storage: storage,
   fileFilter: (
-    req: Request,
+    _: Request,
     file: Express.Multer.File,
     cb: multer.FileFilterCallback,
   ) => {
     // Accept images only
-    if (!file.mimetype.startsWith('image/')) {
+    console.log(file.mimetype);
+
+    if (
+      !file.mimetype.startsWith('image/') &&
+      !file.mimetype.startsWith('text/')
+    ) {
       return cb(new Error('Only image files are allowed!'));
     }
     cb(null, true);
@@ -74,7 +79,6 @@ export const getPublicIdFromUrl = (url: string): string | null => {
     return null;
   }
 };
-
 // Middleware wrapper for single file upload with Cloudinary
 const upload = {
   single: (fieldName: string) => {
@@ -106,29 +110,61 @@ const upload = {
   array: (fieldName: string) => {
     return [
       multerUpload.array(fieldName),
-      async (req: UpdateProfileRequest, res: Response, next: NextFunction) => {
-        if (!req.file) {
-          return next();
-        }
+      // async (req: UpdateProfileRequest, res: Response, next: NextFunction) => {
+      //   if (!req.file) {
+      //     return next();
+      //   }
 
-        try {
-          const result = await uploadToCloudinary(
-            req.file.buffer,
-            'fixx/profiles',
-          );
-          // Attach Cloudinary URL and public_id to the request
-          req.cloudinaryUrl = result.secure_url;
-          req.cloudinaryPublicId = result.public_id;
-          next();
-        } catch (error) {
-          console.error('Cloudinary upload error:', error);
-          return res
-            .status(500)
-            .json({ message: 'Error uploading image to cloud storage.' });
-        }
-      },
+      //   try {
+      //     const result = await uploadToCloudinary(
+      //       req.file.buffer,
+      //       'fixx/profiles',
+      //     );
+      //     // Attach Cloudinary URL and public_id to the request
+      //     req.cloudinaryUrl = result.secure_url;
+      //     req.cloudinaryPublicId = result.public_id;
+      //     next();
+      //   } catch (error) {
+      //     console.error('Cloudinary upload error:', error);
+      //     return res
+      //       .status(500)
+      //       .json({ message: 'Error uploading image to cloud storage.' });
+      //   }
+      // },
     ];
   },
+  // handleCreateTask: () => {
+  //   return [
+  //     multerUpload.any(),
+  //     async (req: CreateTaskRequest, res: Response, next: NextFunction) => {
+  //       try {
+  //         console.log(req.body);
+  //         console.log(req.files);
+  //         if (!req.file) {
+  //           next();
+  //           return;
+  //         }
+
+
+  //         // const task_data = JSON.parse(req.files[0].buffer.toString());
+  //         // console.log(task_data);
+
+  //         // req.task_data = task_data;
+  //         next();
+
+  //         return;
+  //       } catch (error) {
+  //         console.log('Task data handling failed : ' + error);
+  //         return res
+  //           .json({
+  //             success: false,
+  //             error,
+  //           })
+  //           .status(500);
+  //       }
+  //     },
+  //   ];
+  // },
 };
 
 export default upload;

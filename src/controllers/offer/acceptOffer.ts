@@ -2,7 +2,7 @@ import { Response } from 'express';
 import db from '@config/dbConfig';
 import { offers, tasks, bookings, users } from '@db/schema';
 import { eq, and, ne } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
 
 /**

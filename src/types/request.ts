@@ -1,4 +1,5 @@
 import { Request } from 'express';
+import { Task } from './dbTables';
 
 export interface UpdateProfileRequest extends Request {
   cloudinaryUrl?: string;

@@ -7,7 +7,7 @@ import cloudinary from '@config/cloudinaryConfig';
  * @param {string} folder The Cloudinary folder to save the image in (e.g., 'fixx/profiles').
  * @returns {Promise<string>} The Cloudinary URL of the uploaded image.
  */
-export const uploadImageToCloudinary = async (
+export const uploadImageToCloudinaryWithUrl = async (
   url: string,
   folder: string = 'fixx/profiles',
 ): Promise<string> => {

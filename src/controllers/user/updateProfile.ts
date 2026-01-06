@@ -3,7 +3,7 @@ import db from '@config/dbConfig';
 import { users } from '@db/tables';
 import { eq } from 'drizzle-orm';
 import { deleteFromCloudinary, getPublicIdFromUrl } from '@middleware/upload';
-import { type UpdateProfileRequest } from '@/types/common';
+import { type UpdateProfileRequest } from '@/types/request';
 
 export const updateProfile = async (
   req: UpdateProfileRequest,

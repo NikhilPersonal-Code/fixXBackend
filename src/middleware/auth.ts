@@ -1,4 +1,4 @@
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 import { Request, Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 

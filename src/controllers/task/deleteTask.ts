@@ -2,7 +2,7 @@ import { Response } from 'express';
 import db from '@config/dbConfig';
 import { tasks, offers, bookings } from '@db/schema';
 import { eq, and } from 'drizzle-orm';
-import { AuthRequest } from '@/types/common';
+import { AuthRequest } from '@/types/request';
 
 /**
  * Delete a task (only if posted and no accepted offers)
