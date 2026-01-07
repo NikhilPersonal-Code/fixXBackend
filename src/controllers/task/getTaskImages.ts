@@ -22,7 +22,8 @@ export const getTaskImages = async (req: AuthRequest, res: Response) => {
         imageUrl: taskImages.imageUrl,
       })
       .from(taskImages)
-      .where(eq(taskImages.id, taskId));
+      .where(eq(taskImages.taskId, taskId));
+      
 
     if (images.length === 0) {
       return res.json({

@@ -1,8 +1,9 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks, offers, bookings } from '@db/schema';
+import { tasks, offers, bookings, taskImages } from '@db/schema';
 import { eq, and } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
+import { deleteFromCloudinary } from '@/middleware/upload';
 
 /**
  * Delete a task (only if posted and no accepted offers)
@@ -72,6 +73,15 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
 
     // Delete the task
     await db.delete(tasks).where(eq(tasks.id, taskId));
+
+    const urls = await db
+      .delete(taskImages)
+      .where(eq(taskImages.taskId, taskId))
+      .returning({ imageUrl: taskImages.imageUrl });
+
+    for (let i = 0; i < urls.length; i++) {
+      await deleteFromCloudinary(urls[i].imageUrl);
+    }
 
     res.status(200).json({
       status: 'ok',
