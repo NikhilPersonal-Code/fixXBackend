@@ -78,6 +78,7 @@ const getFixxerPublicProfile = async (req: Request, res: Response) => {
         createdAt: reviews.createdAt,
         // Anonymous: only include task title, not client info
         taskTitle: tasks.taskTitle,
+        categoryId: tasks.categoryId,
       })
       .from(reviews)
       .innerJoin(bookings, eq(reviews.bookingId, bookings.id))

@@ -1,5 +1,4 @@
 import 'tsconfig-paths/register';
-import 'dotenv/config';
 import db from '../config/dbConfig';
 import { categories } from '../db/tables';
 

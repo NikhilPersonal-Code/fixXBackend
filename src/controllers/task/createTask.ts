@@ -5,7 +5,6 @@ import { tasks, categories, taskImages } from '@db/tables';
 import { eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { sendPushToAllExcept } from '@utils/pushNotification';
-import { deep, shallow } from 'q-set';
 import { uploadImageToCloudinaryWithUrl } from '@/utils/imageDownloader';
 import { uploadToCloudinary } from '@/middleware/upload';
 

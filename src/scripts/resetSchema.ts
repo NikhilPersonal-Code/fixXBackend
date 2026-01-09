@@ -1,4 +1,4 @@
-
+import 'tsconfig-paths/register';
 import db from '@config/dbConfig';
 import { sql } from 'drizzle-orm';
 
