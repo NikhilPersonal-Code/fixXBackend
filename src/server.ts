@@ -11,6 +11,7 @@ import taskRoutes from '@routes/taskRoutes';
 import offerRoutes from '@routes/offerRoutes';
 import messageRoutes from '@routes/messageRoutes';
 import reviewRoutes from '@routes/reviewRoutes';
+import razorpayRoutes from '@routes/razorpayRoutes';
 import { testConnection } from '@utils/db';
 import { initSocket } from '@utils/socket';
 
@@ -35,6 +36,7 @@ app.use('/api/tasks', taskRoutes);
 app.use('/api/offers', offerRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/reviews', reviewRoutes);
+app.use('/api/razorpay', razorpayRoutes);
 
 
 // Initialize Socket.IO

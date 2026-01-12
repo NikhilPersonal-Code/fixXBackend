@@ -25,6 +25,7 @@ import {
   typeOfTaskEnum,
   userRoleEnum,
 } from './enums';
+import { unique } from 'drizzle-orm/pg-core';
 
 // ==================== CORE TABLES ====================
 
@@ -365,6 +366,7 @@ export const transactions = pgTable(
     amount: numeric('amount', { precision: 12, scale: 2 }).notNull(),
     status: transactionStatusEnum('status').default('pending').notNull(),
     paymentGateway: varchar('payment_gateway', { length: 50 }),
+    orderId: text('order_id').unique(),
     transactionReference: varchar('transaction_reference', { length: 200 }),
     description: text('description'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
