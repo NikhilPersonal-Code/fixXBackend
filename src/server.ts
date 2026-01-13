@@ -1,5 +1,6 @@
 import express, { Application } from 'express';
 import { createServer } from 'http';
+import 'tsconfig-paths/register';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import morgan from 'morgan';
@@ -25,7 +26,6 @@ const io = new Server(httpServer, {
 app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
-// app.use(apiKeyMiddleware); // Apply the API key middleware
 app.use('/api', express.static('public')); // serve static files from public folder
 
 // Routes
@@ -38,11 +38,8 @@ app.use('/api/messages', messageRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/razorpay', razorpayRoutes);
 
-
 // Initialize Socket.IO
 initSocket(io);
-
-// Add more route imports as needed
 
 // Start server
 const PORT = process.env.PORT || 5000;

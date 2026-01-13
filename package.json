@@ -1,7 +1,7 @@
 {
   "name": "fixx-backend",
   "version": "1.0.0",
-  "main": "server.js",
+  "main": "src/server.ts",
   "scripts": {
     "setup": "ts-node setup.ts",
     "build": "tsc && tsc-alias",
@@ -25,7 +25,7 @@
     "crypto": "^1.0.1",
     "dotenv": "^16.6.1",
     "drizzle-orm": "^0.45.1",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "express-validator": "^7.2.1",
     "firebase-admin": "^13.6.0",
     "google-auth-library": "^10.4.0",

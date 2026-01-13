@@ -4,6 +4,7 @@ import { tasks, categories } from '@db/tables';
 import { and, desc, eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { TaskStatus } from '@/db/enums';
+import { log } from 'console';
 
 // Get user's own tasks
 export const getMyTasks = async (req: AuthRequest, res: Response) => {
@@ -15,6 +16,7 @@ export const getMyTasks = async (req: AuthRequest, res: Response) => {
     }
 
     const { status } = req.query;
+
 
     let whereConditions = [eq(tasks.clientId, userId)];
 
