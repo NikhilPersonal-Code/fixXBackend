@@ -8,6 +8,7 @@ export const taskStatusEnum = pgEnum('task_status', [
   'posted',
   'assigned',
   'in_progress',
+  'pending_completion',
   'completed',
   'cancelled',
 ]);

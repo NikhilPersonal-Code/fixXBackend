@@ -96,11 +96,24 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    if (['in_progress', 'completed', 'cancelled'].includes(task.status)) {
+    if (
+      ['in_progress', 'pending_completion', 'completed', 'cancelled'].includes(
+        task.status,
+      )
+    ) {
       timeline.push({
         status: 'in_progress',
         label: 'Work Started',
         timestamp: booking?.startedAt || null,
+        completed: true,
+      });
+    }
+
+    if (['pending_completion', 'completed'].includes(task.status)) {
+      timeline.push({
+        status: 'pending_completion',
+        label: 'Completion Requested',
+        timestamp: task.completionRequestedAt,
         completed: true,
       });
     }
@@ -131,13 +144,21 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
       if (task.status === 'posted') {
         availableActions.push('view_offers', 'cancel_task', 'edit_task');
       } else if (task.status === 'in_progress') {
-        availableActions.push('cancel_task', 'complete_task', 'message_fixxer');
+        availableActions.push('cancel_task', 'message_fixxer');
+      } else if (task.status === 'pending_completion') {
+        availableActions.push(
+          'approve_completion',
+          'reject_completion',
+          'message_fixxer',
+        );
       } else if (task.status === 'completed') {
         availableActions.push('leave_review');
       }
     } else if (userRole === 'fixxer') {
       if (task.status === 'in_progress') {
         availableActions.push('cancel_task', 'complete_task', 'message_client');
+      } else if (task.status === 'pending_completion') {
+        availableActions.push('message_client');
       } else if (task.status === 'completed') {
         availableActions.push('view_review');
       }
@@ -159,6 +180,9 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
           scheduledAt: task.scheduledAt,
           status: task.status,
           offerCount: task.offerCount,
+          completionRequestedBy: task.completionRequestedBy,
+          completionRequestedAt: task.completionRequestedAt,
+          completionRejectionReason: task.completionRejectionReason,
           createdAt: task.createdAt,
           completedAt: task.completedAt,
           cancelledAt: task.cancelledAt,

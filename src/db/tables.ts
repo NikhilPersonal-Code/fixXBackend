@@ -148,6 +148,12 @@ export const tasks = pgTable(
     typeOfTask: typeOfTaskEnum('type_of_task').default('in_person').notNull(),
     status: taskStatusEnum('status').default('posted').notNull(),
     offerCount: integer('offer_count').default(0).notNull(),
+    completionRequestedBy: uuid('completion_requested_by').references(
+      () => users.id,
+      { onDelete: 'set null' },
+    ),
+    completionRequestedAt: timestamp('completion_requested_at'),
+    completionRejectionReason: text('completion_rejection_reason'),
     completedAt: timestamp('completed_at'),
     cancelledAt: timestamp('cancelled_at'),
     cancellationReason: text('cancellation_reason'),

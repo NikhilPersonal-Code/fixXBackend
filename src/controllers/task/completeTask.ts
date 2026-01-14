@@ -6,8 +6,8 @@ import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
 
 /**
- * Mark task as completed
- * Can be called by either client or fixxer
+ * Request task completion (Fixxer marks task as complete)
+ * This sets status to 'pending_completion' and notifies client
  */
 export const completeTask = async (req: AuthRequest, res: Response) => {
   try {
@@ -18,7 +18,7 @@ export const completeTask = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
     }
 
-    // Get task with booking
+    // Get task
     const task = await db.query.tasks.findFirst({
       where: eq(tasks.id, taskId),
     });
@@ -30,18 +30,17 @@ export const completeTask = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Check if user is either client or assigned fixxer
-    const isClient = task.clientId === userId;
+    // Only fixxer can request completion
     const isFixxer = task.assignedFixxerId === userId;
 
-    if (!isClient && !isFixxer) {
+    if (!isFixxer) {
       return res.status(403).json({
         status: 'error',
-        message: 'You are not authorized to complete this task',
+        message: 'Only the assigned fixxer can request task completion',
       });
     }
 
-    // Task must be in_progress to be completed
+    // Task must be in_progress to request completion
     if (task.status !== 'in_progress') {
       return res.status(400).json({
         status: 'error',
@@ -49,93 +48,38 @@ export const completeTask = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Get the booking
-    const booking = await db.query.bookings.findFirst({
-      where: eq(bookings.taskId, taskId),
-    });
-
-    if (!booking) {
-      return res.status(404).json({
-        status: 'error',
-        message: 'Booking not found for this task',
-      });
-    }
-
     const now = new Date();
 
-    // Update task status to completed
-    const [completedTask] = await db
+    // Update task status to pending_completion
+    const [updatedTask] = await db
       .update(tasks)
       .set({
-        status: 'completed',
-        completedAt: now,
+        status: 'pending_completion',
+        completionRequestedBy: userId,
+        completionRequestedAt: now,
         updatedAt: now,
       })
       .where(eq(tasks.id, taskId))
       .returning();
 
-    // Update booking status
-    await db
-      .update(bookings)
-      .set({
-        status: 'completed',
-        completedAt: now,
-        updatedAt: now,
-      })
-      .where(eq(bookings.id, booking.id));
-
-    // Update fixxer profile stats
-    if (task.assignedFixxerId) {
-      const fixxerProfile = await db.query.fixxerProfiles.findFirst({
-        where: eq(fixxerProfiles.userId, task.assignedFixxerId),
-      });
-
-      if (fixxerProfile) {
-        await db
-          .update(fixxerProfiles)
-          .set({
-            completedTasksCount: fixxerProfile.completedTasksCount + 1,
-            updatedAt: now,
-          })
-          .where(eq(fixxerProfiles.userId, task.assignedFixxerId));
-      }
-    }
-
-    // Send notifications
+    // Get client and fixxer info for notifications
     const client = await db.query.users.findFirst({
       where: eq(users.id, task.clientId),
     });
 
-    const fixxer = task.assignedFixxerId
-      ? await db.query.users.findFirst({
-          where: eq(users.id, task.assignedFixxerId),
-        })
-      : null;
+    const fixxer = await db.query.users.findFirst({
+      where: eq(users.id, userId),
+    });
 
-    // TODO: Only Client Can Mark The Task as Completed.
-
-    // Notify the other party
-    if (isClient && fixxer?.fcmToken) {
-      await sendPushNotification(
-        fixxer.fcmToken,
-        'Task Completed!',
-        `${client?.name || 'The client'} has marked the task "${task.taskTitle}" as completed. Great job!`,
-        {
-          taskId,
-          bookingId: booking.id,
-          type: 'task_completed',
-          recipientRole: 'fixxer',
-        },
-      );
-    } else if (isFixxer && client?.fcmToken) {
+    // Notify client about completion request
+    if (client?.fcmToken) {
       await sendPushNotification(
         client.fcmToken,
-        'Task Completed!',
-        `${fixxer?.name || 'Your Fixxer'} has marked the task "${task.taskTitle}" as completed.`,
+        'Task Completion Request',
+        `${fixxer?.name || 'Your Fixxer'} has marked the task "${task.taskTitle}" as completed. Please review and approve.`,
         {
           taskId,
-          bookingId: booking.id,
-          type: 'task_completed',
+          type: 'completion_requested',
           recipientRole: 'client',
         },
       );
@@ -143,20 +87,16 @@ export const completeTask = async (req: AuthRequest, res: Response) => {
 
     return res.json({
       status: 'ok',
-      message: 'Task completed successfully',
+      message: 'Task completion request sent to client',
       data: {
-        task: completedTask,
-        booking: {
-          id: booking.id,
-          status: 'completed',
-        },
+        task: updatedTask,
       },
     });
   } catch (error: any) {
-    console.error('Error completing task:', error);
+    console.error('Error requesting task completion:', error);
     return res.status(500).json({
       status: 'error',
-      message: error.message || 'Failed to complete task',
+      message: error.message || 'Failed to request task completion',
     });
   }
 };
