@@ -102,7 +102,13 @@ export const createOffer = async (req: AuthRequest, res: Response) => {
         client.fcmToken,
         'New Offer Received!',
         `${fixxer?.name || 'A Fixxer'} has made an offer of ₹${price} on your task "${task.taskTitle}"`,
-        { taskId, offerId: newOffer.id, type: 'new_offer' },
+        {
+          taskId,
+          offerId: newOffer.id,
+          type: 'new_offer',
+          recipientRole: 'client',
+          showOffersModal: 'true',
+        },
       );
     }
 

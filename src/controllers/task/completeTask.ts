@@ -118,16 +118,26 @@ export const completeTask = async (req: AuthRequest, res: Response) => {
     if (isClient && fixxer?.fcmToken) {
       await sendPushNotification(
         fixxer.fcmToken,
-        'Task Completed! ✅',
+        'Task Completed!',
         `${client?.name || 'The client'} has marked the task "${task.taskTitle}" as completed. Great job!`,
-        { taskId, bookingId: booking.id, type: 'task_completed' },
+        {
+          taskId,
+          bookingId: booking.id,
+          type: 'task_completed',
+          recipientRole: 'fixxer',
+        },
       );
     } else if (isFixxer && client?.fcmToken) {
       await sendPushNotification(
         client.fcmToken,
-        'Task Completed! ✅',
+        'Task Completed!',
         `${fixxer?.name || 'Your Fixxer'} has marked the task "${task.taskTitle}" as completed.`,
-        { taskId, bookingId: booking.id, type: 'task_completed' },
+        {
+          taskId,
+          bookingId: booking.id,
+          type: 'task_completed',
+          recipientRole: 'client',
+        },
       );
     }
 

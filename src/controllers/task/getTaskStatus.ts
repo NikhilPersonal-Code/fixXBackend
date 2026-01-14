@@ -148,8 +148,8 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
       data: {
         task: {
           id: task.id,
-          title: task.taskTitle,
-          description: task.taskDescription,
+          taskTitle: task.taskTitle,
+          taskDescription: task.taskDescription,
           location: task.taskLocation,
           locationAddress: task.locationAddress,
           budget: task.budget,

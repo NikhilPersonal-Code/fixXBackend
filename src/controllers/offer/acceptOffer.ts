@@ -122,9 +122,14 @@ export const acceptOffer = async (req: AuthRequest, res: Response) => {
     if (fixxer?.fcmToken) {
       await sendPushNotification(
         fixxer.fcmToken,
-        'Offer Accepted! 🎉',
+        'Offer Accepted! ',
         `${client?.name || 'Client'} has accepted your offer for "${offer.task.taskTitle}". You can now start working on the task.`,
-        { taskId: offer.taskId, bookingId: booking.id, type: 'offer_accepted' },
+        {
+          taskId: offer.taskId,
+          bookingId: booking.id,
+          type: 'offer_accepted',
+          recipientRole: 'fixxer',
+        },
       );
     }
 

@@ -25,7 +25,7 @@ router.get('/latest', getLatestTasks); // Get latest tasks (for notifications)
 router.get('/:id', getTaskById); // Get single task details
 
 // Protected routes (require authentication)
-router.post('/', verifyToken, multerUpload.array("images"), createTask); // Create a new task
+router.post('/', verifyToken, multerUpload.any(), createTask); // Create a new task
 router.get('/my/tasks', verifyToken, getMyTasks); // Get user's own tasks
 router.get('/:id/offers', verifyToken, getTaskOffers); // Get offers for a task (client view)
 router.get('/:id/status', verifyToken, getTaskStatus); // Get task status with timeline

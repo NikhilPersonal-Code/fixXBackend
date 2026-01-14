@@ -21,8 +21,6 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     }
     const task_data = JSON.parse(req.body.task_data);
 
-    
-
     let {
       categoryId,
       taskTitle,
@@ -148,6 +146,7 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     // Send push notification to all users except task owner
     await sendPushToAllExcept(userId, 'New Task Available!', taskTitle, {
       taskId: newTask.id,
+      type: 'new_task',
     });
 
     return res.status(201).json({

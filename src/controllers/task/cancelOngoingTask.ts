@@ -104,14 +104,24 @@ export const cancelOngoingTask = async (req: AuthRequest, res: Response) => {
         fixxer.fcmToken,
         'Task Cancelled',
         `${cancellerName || 'The client'} has cancelled the task "${task.taskTitle}".${reason ? ` Reason: ${reason}` : ''}`,
-        { taskId, type: 'task_cancelled', cancelledBy },
+        {
+          taskId,
+          type: 'task_cancelled',
+          cancelledBy,
+          recipientRole: 'fixxer',
+        },
       );
     } else if (isFixxer && client?.fcmToken) {
       await sendPushNotification(
         client.fcmToken,
         'Task Cancelled',
         `${cancellerName || 'Your Fixxer'} has cancelled the task "${task.taskTitle}".${reason ? ` Reason: ${reason}` : ''}`,
-        { taskId, type: 'task_cancelled', cancelledBy },
+        {
+          taskId,
+          type: 'task_cancelled',
+          cancelledBy,
+          recipientRole: 'client',
+        },
       );
     }
 

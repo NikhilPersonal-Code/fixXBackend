@@ -75,7 +75,11 @@ export const rejectOffer = async (req: AuthRequest, res: Response) => {
         fixxer.fcmToken,
         'Offer Not Accepted',
         `${client?.name || 'The client'} has decided to go with another offer for "${offer.task.taskTitle}".`,
-        { taskId: offer.taskId, type: 'offer_rejected' },
+        {
+          taskId: offer.taskId,
+          type: 'offer_rejected',
+          recipientRole: 'fixxer',
+        },
       );
     }
 
