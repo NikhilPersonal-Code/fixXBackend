@@ -17,6 +17,31 @@ export const createOffer = async (req: AuthRequest, res: Response) => {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
     }
 
+    // Check FixBits balance
+    let fixxerProfile = await db.query.fixxerProfiles.findFirst({
+      where: eq(fixxerProfiles.userId, fixxerId),
+    });
+
+    if (!fixxerProfile) {
+      // Create a new Fixxer profile if it doesn't exist (First offer made)
+      const [newProfile] = await db
+        .insert(fixxerProfiles)
+        .values({
+          userId: fixxerId,
+          // Default FixBits is 3 (defined in schema), enough for first offer
+        })
+        .returning();
+      fixxerProfile = newProfile;
+    }
+
+    if (fixxerProfile.fixBits < 1) {
+      return res.status(403).json({
+        status: 'error',
+        message:
+          'Insufficient FixBits! You need 1 FixBit to make an offer. Please purchase FixBits.',
+      });
+    }
+
     // Validate required fields
     if (!taskId || !price) {
       return res.status(400).json({
@@ -76,6 +101,12 @@ export const createOffer = async (req: AuthRequest, res: Response) => {
         status: 'pending',
       })
       .returning();
+
+    // Deduct 1 FixBit
+    await db
+      .update(fixxerProfiles)
+      .set({ fixBits: fixxerProfile.fixBits - 1 })
+      .where(eq(fixxerProfiles.id, fixxerProfile.id));
 
     // Update task offer count
     await db

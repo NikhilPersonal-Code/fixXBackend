@@ -71,6 +71,7 @@ export const cancelOngoingTask = async (req: AuthRequest, res: Response) => {
       .update(tasks)
       .set({
         updatedAt: now,
+        status: 'cancelled',
       })
       .where(eq(tasks.id, taskId))
       .returning();

@@ -86,6 +86,7 @@ export const fixxerProfiles = pgTable(
     hourlyRate: numeric('hourly_rate', { precision: 10, scale: 2 }),
     completedTasksCount: integer('completed_tasks_count').default(0).notNull(),
     averageRating: numeric('average_rating', { precision: 3, scale: 2 }),
+    fixBits: integer('fix_bits').default(3).notNull(),
     // totalEarnings: numeric('total_earnings', { precision: 12, scale: 2 })
     // .default('0')
     // .notNull(),

@@ -90,19 +90,23 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
       completed: true,
     });
 
-    timeline.push({
-      status: 'assigned',
-      label: 'Offer Accepted',
-      timestamp: booking?.createdAt || null,
-      completed: true,
-    });
+    if (booking?.createdAt) {
+      timeline.push({
+        status: 'assigned',
+        label: 'Offer Accepted',
+        timestamp: booking?.createdAt || null,
+        completed: true,
+      });
+    }
 
-    timeline.push({
-      status: 'in_progress',
-      label: 'Work Started',
-      timestamp: booking?.startedAt || null,
-      completed: true,
-    });
+    if (booking?.startedAt) {
+      timeline.push({
+        status: 'in_progress',
+        label: 'Work Started',
+        timestamp: booking?.startedAt || null,
+        completed: true,
+      });
+    }
 
     const timelinesEvents = await db
       .select()

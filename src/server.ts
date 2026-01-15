@@ -27,6 +27,7 @@ app.use(cors());
 app.use(morgan('dev'));
 app.use(express.json());
 app.use('/api', express.static('public')); // serve static files from public folder
+app.set('etag', false);
 
 // Routes
 app.use('/api/test', testRoutes);

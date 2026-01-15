@@ -25,6 +25,7 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
       rating: '0.0',
       money: '0',
       label: 'Earned', // or 'Spent'
+      fixBits: 0,
     };
 
     if (user.userRole === 'fixxer' || user.userRole === 'both') {
@@ -32,6 +33,10 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
       const profile = await db.query.fixxerProfiles.findFirst({
         where: eq(fixxerProfiles.userId, userId),
       });
+
+      if (profile) {
+        stats.fixBits = profile.fixBits;
+      }
 
       // Calculate earnings
       const earningsResult = await db
@@ -58,6 +63,7 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
       const completedTasks = completedTasksResult[0]?.count || 0;
 
       stats = {
+        ...stats,
         tasksCount: completedTasks,
         rating: profile?.averageRating || '0.0',
         money: totalEarnings,
@@ -90,10 +96,14 @@ export const getUserStats = async (req: AuthRequest, res: Response) => {
         rating: 'N/A', // Clients don't have ratings yet
         money: totalSpent,
         label: 'Spent',
+        fixBits: 0,
       };
     }
 
-    res.status(200).json(stats);
+    res.status(200).json({
+      success: true,
+      data: stats,
+    });
   } catch (error) {
     console.error('Error fetching user stats:', error);
     res.status(500).json({ message: 'Internal server error' });
