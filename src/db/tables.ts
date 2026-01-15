@@ -148,15 +148,6 @@ export const tasks = pgTable(
     typeOfTask: typeOfTaskEnum('type_of_task').default('in_person').notNull(),
     status: taskStatusEnum('status').default('posted').notNull(),
     offerCount: integer('offer_count').default(0).notNull(),
-    completionRequestedBy: uuid('completion_requested_by').references(
-      () => users.id,
-      { onDelete: 'set null' },
-    ),
-    completionRequestedAt: timestamp('completion_requested_at'),
-    completionRejectionReason: text('completion_rejection_reason'),
-    completedAt: timestamp('completed_at'),
-    cancelledAt: timestamp('cancelled_at'),
-    cancellationReason: text('cancellation_reason'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
   },
@@ -173,6 +164,33 @@ export const tasks = pgTable(
       'task_description_length_check',
       sql`char_length(task_description) > 25`,
     ),
+  ],
+);
+
+export const taskTimeline = pgTable(
+  'task_timeline',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    taskId: uuid('task_id')
+      .references(() => tasks.id, { onDelete: 'cascade' })
+      .notNull(),
+    status: taskStatusEnum('status').default('posted').notNull(),
+    completionRequestedAt: timestamp('completion_requested_at'),
+    completionRejectionReason: text('completion_rejection_reason'),
+    completedAt: timestamp('completed_at'),
+    cancelledAt: timestamp('cancelled_at'),
+    rejectedAt: timestamp('rejected_at'),
+    cancellationReason: text('cancellation_reason'),
+    completionRequestedBy: uuid('completion_requested_by').references(
+      () => users.id,
+      { onDelete: 'set null' },
+    ),
+    createdAt: timestamp('event_created_at').defaultNow(),
+  },
+  (table) => [
+    index('task_timeline_task_id_idx').on(table.taskId),
+    index('task_timeline_status_idx').on(table.status),
+    index('task_timeline_created_at_idx').on(table.createdAt),
   ],
 );
 

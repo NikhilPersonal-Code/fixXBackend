@@ -1,6 +1,13 @@
 import { Request, Response } from 'express';
 import db from '@config/dbConfig';
-import { users, fixxerProfiles, reviews, bookings, tasks } from '@db/schema';
+import {
+  users,
+  fixxerProfiles,
+  reviews,
+  bookings,
+  tasks,
+  taskTimeline,
+} from '@db/schema';
 import { eq, desc, count, and } from 'drizzle-orm';
 
 /**
@@ -58,15 +65,22 @@ const getFixxerPublicProfile = async (req: Request, res: Response) => {
       .select({
         id: tasks.id,
         taskTitle: tasks.taskTitle,
-        completedAt: tasks.completedAt,
+        completedAt: taskTimeline.completedAt,
         categoryId: tasks.categoryId,
       })
       .from(bookings)
       .innerJoin(tasks, eq(bookings.taskId, tasks.id))
+      .innerJoin(
+        taskTimeline,
+        and(
+          eq(bookings.taskId, taskTimeline.taskId),
+          eq(taskTimeline.status, 'completed'),
+        ),
+      )
       .where(
         and(eq(bookings.fixxerId, fixxerId), eq(bookings.status, 'completed')),
       )
-      .orderBy(desc(tasks.completedAt))
+      .orderBy(desc(taskTimeline.completedAt))
       .limit(10);
 
     // Get reviews (anonymous - don't include client info)

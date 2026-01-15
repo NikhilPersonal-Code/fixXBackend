@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks, bookings, users, offers } from '@db/schema';
+import { tasks, bookings, users, offers, taskTimeline } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
@@ -58,13 +58,18 @@ export const cancelOngoingTask = async (req: AuthRequest, res: Response) => {
 
     const now = new Date();
 
+    // Add cancelled event in the task timeline
+    await db.insert(taskTimeline).values({
+      taskId: task.id,
+      cancelledAt: now,
+      cancellationReason: reason || null,
+      status: 'cancelled',
+    });
+
     // Update task status
     const [cancelledTask] = await db
       .update(tasks)
       .set({
-        status: 'cancelled',
-        cancelledAt: now,
-        cancellationReason: reason || null,
         updatedAt: now,
       })
       .where(eq(tasks.id, taskId))

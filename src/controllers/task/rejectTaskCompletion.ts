@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks, users } from '@db/schema';
+import { tasks, taskTimeline, users } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
@@ -59,14 +59,20 @@ export const rejectTaskCompletion = async (req: AuthRequest, res: Response) => {
 
     const now = new Date();
 
+    // Add In Progress task event in the task timeline
+    await db.insert(taskTimeline).values({
+      taskId: task.id,
+      cancelledAt: now,
+      cancellationReason: reason || null,
+      completionRejectionReason: reason.trim(),
+      status: 'in_progress',
+    });
+
     // Update task status back to in_progress with rejection reason
     const [updatedTask] = await db
       .update(tasks)
       .set({
         status: 'in_progress',
-        completionRejectionReason: reason.trim(),
-        completionRequestedBy: null,
-        completionRequestedAt: null,
         updatedAt: now,
       })
       .where(eq(tasks.id, taskId))

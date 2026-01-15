@@ -45,11 +45,15 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
     }
 
     // Check if task can be deleted (only posted status and no accepted offers)
-    if (task.status !== 'posted') {
+    if (
+      task.status !== 'posted' &&
+      task.status !== 'completed' &&
+      task.status !== 'cancelled'
+    ) {
       res.status(400).json({
         status: 'error',
         message:
-          'Only posted tasks can be deleted. Please cancel the task instead.',
+          'Only posted tasks,completed cancelled can be deleted. Please cancel the task instead.',
       });
       return;
     }
@@ -59,7 +63,7 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
       where: eq(bookings.taskId, taskId),
     });
 
-    if (existingBooking) {
+    if (existingBooking && task.status === 'posted') {
       res.status(400).json({
         status: 'error',
         message:
@@ -67,6 +71,8 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
       });
       return;
     }
+    // Delete all booking first
+    await db.delete(bookings).where(eq(bookings.taskId, taskId));
 
     // Delete all pending offers first
     await db.delete(offers).where(eq(offers.taskId, taskId));

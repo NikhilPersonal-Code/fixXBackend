@@ -1,6 +1,6 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks } from '@db/tables';
+import { tasks, taskTimeline } from '@db/tables';
 import { eq, and } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 
@@ -34,14 +34,20 @@ export const cancelTask = async (req: AuthRequest, res: Response) => {
         message: 'Cannot cancel task that is already completed or cancelled',
       });
     }
+    const now = new Date();
+
+    // Add cancelled event in the task timeline
+    await db.insert(taskTimeline).values({
+      taskId: existingTask.id,
+      status: 'cancelled',
+      cancelledAt: now,
+      cancellationReason: reason || null,
+    });
 
     const [cancelledTask] = await db
       .update(tasks)
       .set({
-        status: 'cancelled',
-        cancelledAt: new Date(),
-        cancellationReason: reason || null,
-        updatedAt: new Date(),
+        updatedAt: now,
       })
       .where(eq(tasks.id, id))
       .returning();

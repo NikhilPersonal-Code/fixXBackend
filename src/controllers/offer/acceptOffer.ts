@@ -84,13 +84,20 @@ export const acceptOffer = async (req: AuthRequest, res: Response) => {
         ),
       );
 
+    const [task] = await db
+      .select()
+      .from(tasks)
+      .where(eq(tasks.id, offer.taskId));
+
+    const now = new Date();
+
     // 3. Update task status to in_progress and assign fixxer
     await db
       .update(tasks)
       .set({
         status: 'in_progress',
         assignedFixxerId: offer.fixxerId,
-        updatedAt: new Date(),
+        updatedAt: now,
       })
       .where(eq(tasks.id, offer.taskId));
 
@@ -104,7 +111,7 @@ export const acceptOffer = async (req: AuthRequest, res: Response) => {
         offerId: offer.id,
         agreedPrice: offer.price,
         status: 'in_progress',
-        startedAt: new Date(),
+        startedAt: task.scheduledAt ? task.scheduledAt : now,
       })
       .returning();
 

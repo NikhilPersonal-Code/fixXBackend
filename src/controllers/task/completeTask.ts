@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks, bookings, users, fixxerProfiles } from '@db/schema';
+import { tasks, bookings, users, fixxerProfiles,taskTimeline } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
@@ -50,13 +50,19 @@ export const completeTask = async (req: AuthRequest, res: Response) => {
 
     const now = new Date();
 
+    // Add Completion Request From Fixxer To Client event in the task timeline
+    await db.insert(taskTimeline).values({
+      taskId: task.id,
+      status: 'pending_completion',
+      completionRequestedBy: userId,
+      completionRequestedAt: now,
+    });
+
     // Update task status to pending_completion
     const [updatedTask] = await db
       .update(tasks)
       .set({
         status: 'pending_completion',
-        completionRequestedBy: userId,
-        completionRequestedAt: now,
         updatedAt: now,
       })
       .where(eq(tasks.id, taskId))

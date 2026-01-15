@@ -1,7 +1,14 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks, bookings, offers, users, categories } from '@db/schema';
-import { eq } from 'drizzle-orm';
+import {
+  tasks,
+  bookings,
+  offers,
+  users,
+  categories,
+  taskTimeline,
+} from '@db/schema';
+import { asc, eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 
 /**
@@ -83,59 +90,68 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
       completed: true,
     });
 
-    if (
-      ['assigned', 'in_progress', 'completed', 'cancelled'].includes(
-        task.status,
-      )
-    ) {
-      timeline.push({
-        status: 'assigned',
-        label: 'Offer Accepted',
-        timestamp: booking?.createdAt || null,
-        completed: true,
-      });
-    }
+    timeline.push({
+      status: 'assigned',
+      label: 'Offer Accepted',
+      timestamp: booking?.createdAt || null,
+      completed: true,
+    });
 
-    if (
-      ['in_progress', 'pending_completion', 'completed', 'cancelled'].includes(
-        task.status,
-      )
-    ) {
-      timeline.push({
-        status: 'in_progress',
-        label: 'Work Started',
-        timestamp: booking?.startedAt || null,
-        completed: true,
-      });
-    }
+    timeline.push({
+      status: 'in_progress',
+      label: 'Work Started',
+      timestamp: booking?.startedAt || null,
+      completed: true,
+    });
 
-    if (['pending_completion', 'completed'].includes(task.status)) {
-      timeline.push({
-        status: 'pending_completion',
-        label: 'Completion Requested',
-        timestamp: task.completionRequestedAt,
-        completed: true,
-      });
-    }
+    const timelinesEvents = await db
+      .select()
+      .from(taskTimeline)
+      .where(eq(taskTimeline.taskId, task.id))
+      .orderBy(asc(taskTimeline.createdAt));
 
-    if (task.status === 'completed') {
-      timeline.push({
-        status: 'completed',
-        label: 'Task Completed',
-        timestamp: task.completedAt,
-        completed: true,
-      });
-    }
+    timelinesEvents.forEach((event, index) => {
+      // Show completion rejection in timeline if task was rejected and is back in progress
+      if (event.status === 'in_progress' && event.completionRejectionReason) {
+        timeline.push({
+          status: 'completion_rejected',
+          label: 'Completion Rejected',
+          timestamp: event.rejectedAt,
+          completed: true,
+          reason: event.completionRejectionReason,
+        });
+      }
 
-    if (task.status === 'cancelled') {
-      timeline.push({
-        status: 'cancelled',
-        label: 'Task Cancelled',
-        timestamp: task.cancelledAt,
-        completed: true,
-        reason: task.cancellationReason || booking?.cancellationReason,
-      });
-    }
+      if (['pending_completion'].includes(event.status)) {
+        timeline.push({
+          status: 'pending_completion',
+          label: 'Completion Requested',
+          timestamp: event.completionRequestedAt,
+          completed: true,
+        });
+      }
+
+      if (index === timelinesEvents.length - 1) {
+        if (task.status === 'completed') {
+          timeline.push({
+            status: 'completed',
+            label: 'Task Completed',
+            timestamp: event.completedAt,
+            completed: true,
+          });
+        }
+
+        if (task.status === 'cancelled') {
+          timeline.push({
+            status: 'cancelled',
+            label: 'Task Cancelled',
+            timestamp: event.cancelledAt,
+            completed: true,
+            reason: event.cancellationReason || booking?.cancellationReason,
+          });
+        }
+      }
+    });
 
     // Available actions based on current status and user role
     const availableActions = [];
@@ -180,13 +196,7 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
           scheduledAt: task.scheduledAt,
           status: task.status,
           offerCount: task.offerCount,
-          completionRequestedBy: task.completionRequestedBy,
-          completionRequestedAt: task.completionRequestedAt,
-          completionRejectionReason: task.completionRejectionReason,
           createdAt: task.createdAt,
-          completedAt: task.completedAt,
-          cancelledAt: task.cancelledAt,
-          cancellationReason: task.cancellationReason,
         },
         category: task.category,
         client: task.client,

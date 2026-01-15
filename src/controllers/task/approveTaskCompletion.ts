@@ -1,6 +1,12 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks, bookings, fixxerProfiles, users } from '@db/schema';
+import {
+  tasks,
+  bookings,
+  fixxerProfiles,
+  users,
+  taskTimeline,
+} from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
@@ -65,13 +71,18 @@ export const approveTaskCompletion = async (
 
     const now = new Date();
 
+    // Add completed event in the task timeline
+    await db.insert(taskTimeline).values({
+      taskId: task.id,
+      completedAt: now,
+      status: 'completed',
+    });
+
     // Update task status to completed
     const [completedTask] = await db
       .update(tasks)
       .set({
         status: 'completed',
-        completedAt: now,
-        completionRejectionReason: null, // Clear any previous rejection reason
         updatedAt: now,
       })
       .where(eq(tasks.id, taskId))
