@@ -10,7 +10,7 @@ import { AuthRequest } from '@/types/request';
 export const withdrawOffer = async (req: AuthRequest, res: Response) => {
   try {
     const fixxerId = req.user?.userId;
-    const { offerId } = req.params;
+    const offerId = req.params.offerId as string;
 
     if (!fixxerId) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });

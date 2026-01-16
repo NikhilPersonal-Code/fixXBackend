@@ -9,7 +9,7 @@ import { AuthRequest } from '@/types/request';
  */
 const getReviewByBooking = async (req: AuthRequest, res: Response) => {
   try {
-    const { bookingId } = req.params;
+    const bookingId = req.params.bookingId as string;
 
     const review = await db.query.reviews.findFirst({
       where: eq(reviews.bookingId, bookingId),

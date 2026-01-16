@@ -9,7 +9,7 @@ import { AuthRequest } from '@/types/request';
  */
 const getFixxerReviews = async (req: AuthRequest, res: Response) => {
   try {
-    const { fixxerId } = req.params;
+    const fixxerId = req.params.fixxerId as string;
 
     const fixxerReviews = await db.query.reviews.findMany({
       where: eq(reviews.fixxerId, fixxerId),

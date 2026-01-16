@@ -6,8 +6,8 @@ import { promises as fs } from 'fs';
 import path from 'path';
 
 export const deleteAccount = async (req: Request, res: Response) => {
-  const { userId } = req.params;
-  const id = userId || "";
+  const userId = req.params.userId as string;
+  const id = userId || '';
 
   try {
     return await db.transaction(async (tx) => {

@@ -12,7 +12,7 @@ import { sendPushNotification } from '@utils/pushNotification';
 export const acceptOffer = async (req: AuthRequest, res: Response) => {
   try {
     const clientId = req.user?.userId;
-    const { offerId } = req.params;
+    const offerId = req.params.offerId as string;
 
     if (!clientId) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });

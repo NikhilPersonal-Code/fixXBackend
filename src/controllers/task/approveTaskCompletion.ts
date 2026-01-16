@@ -21,7 +21,7 @@ export const approveTaskCompletion = async (
 ) => {
   try {
     const userId = req.user?.userId;
-    const { id: taskId } = req.params;
+    const taskId = req.params.id as string;
 
     if (!userId) {
       return res.status(401).json({ status: 'error', message: 'Unauthorized' });
