@@ -1,6 +1,6 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { tasks, bookings, users, fixxerProfiles,taskTimeline } from '@db/schema';
+import { tasks, bookings, users, taskTimeline } from '@db/schema';
 import { eq } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
