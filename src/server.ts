@@ -13,8 +13,10 @@ import offerRoutes from '@routes/offerRoutes';
 import messageRoutes from '@routes/messageRoutes';
 import reviewRoutes from '@routes/reviewRoutes';
 import razorpayRoutes from '@routes/razorpayRoutes';
+import adminRoutes from '@routes/adminRoutes';
 import { testConnection } from '@utils/db';
 import { initSocket } from '@utils/socket';
+import { errorHandler } from './utils/errorHandler';
 
 const app: Application = express();
 const httpServer = createServer(app);
@@ -38,6 +40,8 @@ app.use('/api/offers', offerRoutes);
 app.use('/api/messages', messageRoutes);
 app.use('/api/reviews', reviewRoutes);
 app.use('/api/razorpay', razorpayRoutes);
+app.use('/api/admin', adminRoutes);
+app.use(errorHandler);
 
 // Initialize Socket.IO
 initSocket(io);

@@ -37,19 +37,20 @@ export const users = pgTable(
     email: text('email').unique().notNull(),
     username: text('username').unique().notNull(),
     passwordHash: text('password_hash'),
-    // phoneNumber: varchar('phone_number', { length: 20 }).unique(),
+    phoneNumber: varchar('phone_number', { length: 20 }).unique(),
     profileUrl: text('profile_url'),
     fcmToken: text('fcm_token'),
     userRole: userRoleEnum('user_role').default('both').notNull(),
     isActive: boolean('is_active').default(false).notNull(),
     isEmailVerified: boolean('is_email_verified').default(false).notNull(),
     // Keeping Email authentication only for now. Phone verification can be added later. --- NikhilRW
-    // isPhoneVerified: boolean('is_phone_verified').default(false).notNull(),
+    isPhoneVerified: boolean('is_phone_verified').default(false).notNull(),
     resetToken: text('reset_token'),
     resetTokenExpires: timestamp('reset_token_expires'),
     lastLoginAt: timestamp('last_login_at'),
     createdAt: timestamp('created_at').defaultNow().notNull(),
     updatedAt: timestamp('updated_at').defaultNow().notNull(),
+    blocked: boolean('blocked').default(false).notNull(),
   },
   (table) => [
     index('users_email_idx').on(table.email),
@@ -102,6 +103,7 @@ export const fixxerProfiles = pgTable(
   (table) => [
     index('fixxer_profiles_user_id_idx').on(table.userId),
     index('fixxer_profiles_is_available_idx').on(table.isAvailable),
+    check('fix_bits_value_check', sql`fix_bits > 0`),
   ],
 );
 

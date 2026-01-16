@@ -1,12 +1,15 @@
-import { Request, Response } from 'express';
+import { Response } from 'express';
 import db from '@config/dbConfig';
 import { tasks, categories, users } from '@db/tables';
-import { eq, desc, and } from 'drizzle-orm';
+import { eq, desc, and, ne } from 'drizzle-orm';
+import { AuthRequest } from '@/types';
 
 // Get latest tasks (for notifications)
-export const getLatestTasks = async (req: Request, res: Response) => {
+export const getLatestTasks = async (req: AuthRequest, res: Response) => {
   try {
     const { limit = 10 } = req.query;
+    // For resolving typescript error used or operator.
+    const userId = req.user?.userId || '';
 
     const latestTasks = await db
       .select({
@@ -29,7 +32,7 @@ export const getLatestTasks = async (req: Request, res: Response) => {
       .from(tasks)
       .leftJoin(categories, eq(tasks.categoryId, categories.id))
       .leftJoin(users, eq(tasks.clientId, users.id))
-      .where(eq(tasks.status, 'posted'))
+      .where(and(eq(tasks.status, 'posted'), ne(tasks.clientId, userId)))
       .orderBy(desc(tasks.createdAt))
       .limit(Number(limit));
 
