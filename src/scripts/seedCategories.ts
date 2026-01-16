@@ -9,6 +9,7 @@ const CATEGORY_DATA = [
     categoryName: 'Cleaning',
     description: 'Home and office cleaning services',
     iconUrl: 'spray-bottle',
+    
     displayOrder: 1,
   },
   {
