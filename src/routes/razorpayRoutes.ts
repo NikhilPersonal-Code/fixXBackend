@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { createOrder, verifyPayment } from '@controllers/razorpay';
+// import { createOrder, verifyPayment } from '@controllers/razorpay';
 import verifyToken from '@middleware/auth';
 
 const router = Router();
@@ -10,7 +10,7 @@ const router = Router();
 // router.use(verifyToken);
 
 // Fixxer routes
-router.post('/create-order', createOrder); // Create a new order
-router.post('/verify-payment', verifyPayment); // Create a new order
+// router.post('/create-order', createOrder); // Create a new order
+// router.post('/verify-payment', verifyPayment); // Create a new order
 
 export default router;

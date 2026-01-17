@@ -4,7 +4,7 @@
   "main": "src/server.ts",
   "scripts": {
     "setup": "ts-node setup.ts",
-    "build": "tsc && tsc-alias",
+    "build": "tsc --version && tsc && tsc-alias",
     "start": "node dist/server.js",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
     "lint": "eslint 'src/**/*.ts'",
@@ -32,7 +32,6 @@
     "morgan": "^1.10.0",
     "multer": "^2.0.1",
     "pg": "^8.16.3",
-    "razorpay": "^2.9.6",
     "socket.io": "^4.8.3",
     "tsconfig-paths": "^4.2.0",
     "twilio": "^5.11.2"
