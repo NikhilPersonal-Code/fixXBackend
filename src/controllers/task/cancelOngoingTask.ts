@@ -22,7 +22,7 @@ export const cancelOngoingTask = async (req: AuthRequest, res: Response) => {
 
     // Get task
     const task = await db.query.tasks.findFirst({
-      where: eq(tasks.id, taskId as string),
+      where: eq(tasks.id, taskId),
     });
 
     if (!task) {
