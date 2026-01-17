@@ -9,6 +9,7 @@ const adminAuthMiddleware = async (
   next: NextFunction,
 ) => {
   const accessTokenHash = req.header('Authorization')?.split(' ')[1];
+
   if (!accessTokenHash)
     return res.status(401).json({ message: 'Not Authorized Admin' });
 

@@ -1,8 +1,9 @@
 import { Response } from 'express';
 import db from '@config/dbConfig';
-import { fixxerProfiles } from '@db/schema';
+import { fixxerProfiles, fixBitsPurchases } from '@db/tables';
 import { eq, sql } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
+import { users } from '@db/schema';
 
 /**
  * Purchase FixBits (Mock Implementation)
@@ -35,14 +36,24 @@ export const purchaseFixBits = async (req: AuthRequest, res: Response) => {
       });
     }
 
-    // Update FixBits balance
-    await db
-      .update(fixxerProfiles)
-      .set({
-        fixBits: sql`${fixxerProfiles.fixBits} + ${amount}`,
-        updatedAt: new Date(),
-      })
-      .where(eq(fixxerProfiles.userId, userId));
+    await db.transaction(async (tx) => {
+      // Update FixBits balance
+      await tx
+        .update(fixxerProfiles)
+        .set({
+          fixBits: sql`${fixxerProfiles.fixBits} + ${amount}`,
+          updatedAt: new Date(),
+        })
+        .where(eq(fixxerProfiles.userId, userId));
+
+      // Record purchase history
+      await tx.insert(fixBitsPurchases).values({
+        userId,
+        amount,
+        cost,
+        couponCode: couponCode || null,
+      });
+    });
 
     return res.json({
       status: 'ok',

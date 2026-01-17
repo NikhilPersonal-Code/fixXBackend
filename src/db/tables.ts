@@ -432,3 +432,23 @@ export const referrals = pgTable(
     index('referrals_referral_code_idx').on(table.referralCode),
   ],
 );
+
+export const fixBitsPurchases = pgTable(
+  'fix_bits_purchases',
+  {
+    id: uuid('id').primaryKey().defaultRandom(),
+    userId: uuid('user_id')
+      .references(() => users.id, { onDelete: 'cascade' })
+      .notNull(),
+    amount: integer('amount').notNull(),
+    cost: numeric('cost', { precision: 10, scale: 2 }).notNull(),
+    couponCode: text('coupon_code'),
+    createdAt: timestamp('created_at').defaultNow().notNull(),
+  },
+  (table) => [
+    index('fix_bits_purchases_user_id_idx').on(table.userId),
+    index('fix_bits_purchases_created_at_idx').on(table.createdAt),
+    check('fix_bits_amount_check', sql`amount > 0`),
+    check('fix_bits_cost_check', sql`cost >= 0`),
+  ],
+);
