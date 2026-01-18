@@ -22,9 +22,15 @@ const authMiddleware = async (
       return blockedResponse;
     }
     next();
-  } catch (err) {
+  } catch (error) {
+    const err = error as Error;
     console.log(err);
-    res.status(401).json({ message: 'Invalid token' });
+    if (err && err.message.includes('jwt expired')) {
+      return res
+        .status(401)
+        .json({ message: 'Session expired please login again.' });
+    }
+    return res.status(401).json({ message: 'Invalid token.' });
   }
 };
 

@@ -26,6 +26,6 @@ router.patch(
   updateProfile,
 );
 
-router.post('/fcm-token', authMiddleware, updateFcmToken);
+router.put('/fcm-token', authMiddleware, updateFcmToken);
 
 export default router;
