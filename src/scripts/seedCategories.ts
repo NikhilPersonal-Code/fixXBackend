@@ -9,7 +9,7 @@ const CATEGORY_DATA = [
     categoryName: 'Cleaning',
     description: 'Home and office cleaning services',
     iconUrl: 'spray-bottle',
-    
+
     displayOrder: 1,
   },
   {
@@ -144,6 +144,13 @@ const CATEGORY_DATA = [
     description: 'Event planning and assistance',
     iconUrl: 'party-popper',
     displayOrder: 20,
+  },
+  {
+    id: 'a1b2c3d4-e5f6-7890-abcd-ef1234567821',
+    categoryName: 'Design',
+    description: 'Design And Art',
+    iconUrl: 'paint-brush',
+    displayOrder: 21,
   },
 ];
 
