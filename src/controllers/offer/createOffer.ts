@@ -4,6 +4,7 @@ import { offers, tasks, users, fixxerProfiles } from '@db/schema';
 import { eq, and } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 import { sendPushNotification } from '@utils/pushNotification';
+import { scheduleFixbitIncrement } from '@/utils/scheduler';
 
 /**
  * Create a new offer for a task (Fixxer only)
@@ -108,6 +109,7 @@ export const createOffer = async (req: AuthRequest, res: Response) => {
       .set({ fixBits: fixxerProfile.fixBits - 1 })
       .where(eq(fixxerProfiles.id, fixxerProfile.id));
 
+    scheduleFixbitIncrement(fixxerProfile.id);
     // Update task offer count
     await db
       .update(tasks)

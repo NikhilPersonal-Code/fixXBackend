@@ -1,5 +1,5 @@
 import { AuthRequest } from '@/types/request';
-import { checkUserBlockStatus } from '@/utils/checkUserBlockStatus';
+import { checkUserBlockStatus } from '@/middleware/checkUserBlockedStatus';
 import { Response, NextFunction } from 'express';
 import jwt from 'jsonwebtoken';
 

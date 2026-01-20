@@ -16,3 +16,5 @@ export const dbConfig: PoolConfig = {
       ? { rejectUnauthorized: false }
       : false,
 };
+
+export const DAY_IN_SECONDS = 86400 * 1000;
