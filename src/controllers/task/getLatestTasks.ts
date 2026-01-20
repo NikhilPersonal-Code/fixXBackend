@@ -28,6 +28,7 @@ export const getLatestTasks = async (req: AuthRequest, res: Response) => {
         clientProfileUrl: users.profileUrl,
         openToOffer: tasks.openToOffer || false,
         priceType: tasks.priceType || null,
+        voiceInstructionUrl: tasks.voiceInstructionUrl || null,
       })
       .from(tasks)
       .leftJoin(categories, eq(tasks.categoryId, categories.id))

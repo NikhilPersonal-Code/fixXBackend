@@ -7,12 +7,13 @@ import { AuthRequest } from '@/types/request';
 import { sendPushToAllExcept } from '@utils/pushNotification';
 import { uploadImageToCloudinaryWithUrl } from '@/utils/imageDownloader';
 import { uploadToCloudinary } from '@/middleware/upload';
+import { uploadToBucket } from '@/utils/bucket';
 
 // Create a new task
 export const createTask = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId || req.body.userId;
-
+    console.log(req.files);
     if (!userId) {
       return res.status(401).json({
         status: 'error',
@@ -123,11 +124,24 @@ export const createTask = async (req: AuthRequest, res: Response) => {
     const cloudinaryUrls: string[] = [];
     if (req.files) {
       for (let file of req.files as any) {
-        const response = await uploadToCloudinary(
-          file.buffer,
-          'fixx/task_images',
-        );
-        cloudinaryUrls.push(response.secure_url);
+        if (file.mimetype.startsWith('image/')) {
+          const response = await uploadToCloudinary(
+            file.buffer,
+            'fixx/task_images',
+          );
+          cloudinaryUrls.push(response.secure_url);
+        } else if (file.mimetype.startsWith('audio/')) {
+          const response = await uploadToCloudinary(
+            file.buffer,
+            'fixx/voice_instructions',
+          );
+          await db
+            .update(tasks)
+            .set({
+              voiceInstructionUrl: response.secure_url,
+            })
+            .where(eq(tasks.id, newTask.id));
+        }
       }
     }
 

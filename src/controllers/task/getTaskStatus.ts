@@ -201,6 +201,7 @@ export const getTaskStatus = async (req: AuthRequest, res: Response) => {
           status: task.status,
           offerCount: task.offerCount,
           createdAt: task.createdAt,
+          voiceInstructionUrl: task.voiceInstructionUrl,
         },
         category: task.category,
         client: task.client,

@@ -89,6 +89,10 @@ export const deleteTask = async (req: AuthRequest, res: Response) => {
       await deleteFromCloudinary(urls[i].imageUrl);
     }
 
+    if (task.voiceInstructionUrl) {
+      await deleteFromCloudinary(task.voiceInstructionUrl);
+    }
+
     res.status(200).json({
       status: 'ok',
       message: 'Task deleted successfully',

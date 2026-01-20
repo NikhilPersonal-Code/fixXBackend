@@ -1,7 +1,7 @@
 import multer from 'multer';
 import { Request, Response, NextFunction } from 'express';
 import cloudinary from '@config/cloudinaryConfig';
-import {  UpdateProfileRequest } from '@/types/request';
+import { UpdateProfileRequest } from '@/types/request';
 
 // Use memory storage to get file buffer for Cloudinary upload
 const storage = multer.memoryStorage();
@@ -19,9 +19,10 @@ export const multerUpload = multer({
 
     if (
       !file.mimetype.startsWith('image/') &&
-      !file.mimetype.startsWith('text/')
+      !file.mimetype.startsWith('text/') &&
+      !file.mimetype.startsWith('audio/')
     ) {
-      return cb(new Error('Only image files are allowed!'));
+      return cb(new Error('Only image,text,audio files are allowed!'));
     }
     cb(null, true);
   },
@@ -39,7 +40,7 @@ export const uploadToCloudinary = (
     const uploadStream = cloudinary.uploader.upload_stream(
       {
         folder: folder,
-        resource_type: 'image',
+        resource_type: 'auto',
       },
       (error, result) => {
         if (error) {
@@ -144,7 +145,6 @@ const upload = {
   //           next();
   //           return;
   //         }
-
 
   //         // const task_data = JSON.parse(req.files[0].buffer.toString());
   //         // console.log(task_data);
