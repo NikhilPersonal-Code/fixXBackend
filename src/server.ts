@@ -1,6 +1,6 @@
 import express, { Application } from 'express';
 import { createServer } from 'http';
-import 'tsconfig-paths/register';
+// import 'tsconfig-paths/register';
 import { Server } from 'socket.io';
 import cors from 'cors';
 import morgan from 'morgan';
