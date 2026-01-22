@@ -35,3 +35,5 @@ Thumbs.db
 /personal
 sample.ts
 /dist
+.vercel
+.env*.local

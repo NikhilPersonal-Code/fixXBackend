@@ -5,7 +5,7 @@
   "scripts": {
     "setup": "ts-node setup.ts",
     "build": "tsc && tsc-alias",
-    "start": "node dist/server.js",
+    "start": "ts-node -r tsconfig-paths/register src/server.ts",
     "dev": "nodemon --exec ts-node -r tsconfig-paths/register src/server.ts",
     "lint": "eslint 'src/**/*.ts'",
     "db:generate": "drizzle-kit generate",
@@ -54,7 +54,6 @@
     "prettier": "^3.7.4",
     "ts-node": "^10.9.2",
     "tsc-alias": "^1.8.16",
-    "tsx": "^4.21.0",
-    "typescript": "^5.9.3"
+    "tsx": "^4.21.0"
   }
 }
