@@ -23,7 +23,7 @@ import upload, { multerUpload } from '@/middleware/upload';
 const router = Router();
 
 // Public routes
-router.get('/', getTasks); // Get all posted tasks (for feed)
+router.get('/', verifyToken, getTasks); // Get all posted tasks (for feed)
 router.get('/latest', verifyToken, getLatestTasks); // Get latest tasks (for notifications)
 router.get('/:id', getTaskById); // Get single task details
 
