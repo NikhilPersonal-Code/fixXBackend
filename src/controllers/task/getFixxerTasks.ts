@@ -4,11 +4,8 @@ import { tasks, categories, users } from '@db/tables';
 import { and, desc, eq, isNotNull } from 'drizzle-orm';
 import { AuthRequest } from '@/types/request';
 
-// Get tasks assigned to the current fixxer
-export const getFixxerAssignedTasks = async (
-  req: AuthRequest,
-  res: Response,
-) => {
+// Get tasks assigned related to fixxer
+export const getFixxerTasks = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?.userId;
 

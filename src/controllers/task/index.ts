@@ -10,6 +10,6 @@ export * from './getTaskById';
 export * from './getTaskStatus';
 export * from './getTasks';
 export * from './updateTask';
-export * from './getFixxerAssignedTasks';
+export * from './getFixxerTasks';
 export { default as getTaskOffers } from './getTaskOffers';
 export { default as deleteTask } from './deleteTask';

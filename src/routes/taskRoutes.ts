@@ -12,9 +12,9 @@ import {
   cancelOngoingTask,
   getTaskStatus,
   deleteTask,
-  getFixxerAssignedTasks,
   approveTaskCompletion,
   rejectTaskCompletion,
+  getFixxerTasks,
 } from '@controllers/task';
 import verifyToken from '@middleware/auth';
 import { getTaskImages } from '@/controllers/task/getTaskImages';
@@ -30,7 +30,7 @@ router.get('/:id', getTaskById); // Get single task details
 // Protected routes (require authentication)
 router.post('/', verifyToken, multerUpload.any(), createTask); // Create a new task
 router.get('/my/tasks', verifyToken, getMyTasks); // Get user's own tasks
-router.get('/fixxer/assigned', verifyToken, getFixxerAssignedTasks); // Get tasks assigned to fixxer
+router.get('/fixxer/all', verifyToken, getFixxerTasks); // Get tasks related to fixxer either fixxer was in that task and task is completed or it was cancelled by the poster or it is in currently in the progress in which fixxer is assigned the task
 router.get('/:id/offers', verifyToken, getTaskOffers); // Get offers for a task (client view)
 router.get('/:id/status', verifyToken, getTaskStatus); // Get task status with timeline
 router.put('/:id', verifyToken, updateTask); // Update a task

@@ -2,13 +2,16 @@ import { Request, Response } from 'express';
 import db from '@config/dbConfig';
 import { tasks, categories, users } from '@db/tables';
 import { eq, desc, and, SQL, or, ne } from 'drizzle-orm';
-import { taskStatusEnum, type TaskStatus } from '@/db/enums';
+import { type TaskStatus } from '@/db/enums';
 import { withinRadius } from '@utils/spatial';
+import { AuthRequest } from '@/types';
 
 // Get all tasks (for notifications/feed)
-export const getTasks = async (req: Request, res: Response) => {
+export const getTasks = async (req: AuthRequest, res: Response) => {
   try {
     // TODO: Implement Pagination In The Frontend
+    const userId = req.user?.userId;
+
     const {
       limit = 20,
       offset = 0,
@@ -26,6 +29,11 @@ export const getTasks = async (req: Request, res: Response) => {
     // Category filter
     if (categoryId) {
       whereConditions.push(eq(tasks.categoryId, categoryId as string));
+    }
+
+    // To not to show user his or her own tasks.
+    if (userId) {
+      whereConditions.push(ne(users.id, userId));
     }
 
     // Location and radius filter
